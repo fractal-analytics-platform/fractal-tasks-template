@@ -32,6 +32,8 @@ package_name:
 
 project_url:
   help: A URL for your project home page or documentation (optional)
+  type: str
+  default: 
 
 project_short_description:
   help: A short description of the package
