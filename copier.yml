@@ -1,0 +1,56 @@
+# ---------- CONFIG --------
+
+_subdirectory: project
+_skip_if_exists:
+  - README.md
+
+# Tasks to execute after generating or updating a project.
+# _tasks:
+#   - git init -q --initial-branch=main || true
+#   - "{{ use_pre_commit }} && pre-commit autoupdate || echo 'please run: pip install pre-commit && pre-commit autoupdate'"
+#   - git add . &&
+#     git commit -q -m 'initial commit' &&
+#     echo 'git repo initialized' || echo 'git init failed'
+
+# ---------- PROMPT --------
+
+# https://copier.readthedocs.io/en/stable/configuring/#questions
+
+
+author_name:
+  help: Your full name (used in the project metadata)
+  default: Your Name
+
+author_email:
+  help: Your email address (used in the project metadata)
+  default: first.last@example.com
+  validator: "{% if '@' not in author_email or '.' not in author_email %}Invalid Email{% endif %}"
+
+project_name:
+  help: Name of your project (prefer hyphens to underscores)
+  default: my-project
+  validator: >-
+    {% if not (project_name | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-]+$')) %}
+    project_name must start with a letter, followed one or more letters, digits, hyphens, or underscores all lowercase.
+    {% endif %}
+
+package_name:
+  help: Name of your top-level Python package (the one appearing in Python `import` statements)
+  default: "{{ project_name.lower().replace(' ', '_').replace('-', '_') }}"
+  validator: "{% if not package_name.isidentifier() %}Invalid package name{% endif %}"
+
+project_short_description:
+  help: A short description of the package
+  default: Package description.
+
+project_license:
+  when: "{{ mode == 'customize' }}"
+  help: What license would you like to use? (https://choosealicense.com/)
+  type: str
+  default: BSD-3-Clause
+  choices:
+    BSD-3-Clause: BSD-3-Clause
+    MIT: MIT
+    Apache-2.0: Apache-2.0
+    GNU GPLv3: GPL-3.0
+    none: none
