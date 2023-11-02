@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
         # Update docs_info, based on task-function description
         docs_info = create_docs_info(executable, package=PACKAGE)
-        docs_link = "https://example.org"  # FIXME
+        docs_link = "{{project_url}}"
         if docs_info:
             manifest["task_list"][ind]["docs_info"] = docs_info
         if docs_link:
