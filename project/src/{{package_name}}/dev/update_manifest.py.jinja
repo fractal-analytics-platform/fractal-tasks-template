@@ -2,7 +2,9 @@
 Script to generate JSON schemas for task arguments afresh, and write them
 to the package manifest.
 
-This 
+This script is a copy of [the original one in
+fractal-tasks-core](https://github.com/fractal-analytics-platform/fractal-tasks-core/blob/main/fractal_tasks_core/dev/update_manifest.py),
+with minor changes.
 """
 import json
 import logging
@@ -13,7 +15,6 @@ from fractal_tasks_core.dev.lib_args_schemas import (
     create_schema_for_single_task,
 )
 from fractal_tasks_core.dev.lib_task_docs import create_docs_info
-from fractal_tasks_core.dev.lib_task_docs import create_docs_link
 
 
 PACKAGE = "{{package_name}}"
