@@ -30,6 +30,9 @@ package_name:
   default: "{{ project_name.lower().replace(' ', '_').replace('-', '_') }}"
   validator: "{% if not package_name.isidentifier() %}Invalid package name{% endif %}"
 
+project_url:
+  help: A URL for your project home page or documentation (optional)
+
 project_short_description:
   help: A short description of the package
   default: Package description.
