@@ -1,21 +1,12 @@
-# ---------- CONFIG --------
+# This file is a modified version of `copier.yml` from
+# https://github.com/pydev-guide/pyrepo-copier.
+# Original copyright notice:
+#   BSD 3-Clause License
+#   Copyright (c) 2021, Talley Lambert
 
 _subdirectory: project
 _skip_if_exists:
   - README.md
-
-# Tasks to execute after generating or updating a project.
-# _tasks:
-#   - git init -q --initial-branch=main || true
-#   - "{{ use_pre_commit }} && pre-commit autoupdate || echo 'please run: pip install pre-commit && pre-commit autoupdate'"
-#   - git add . &&
-#     git commit -q -m 'initial commit' &&
-#     echo 'git repo initialized' || echo 'git init failed'
-
-# ---------- PROMPT --------
-
-# https://copier.readthedocs.io/en/stable/configuring/#questions
-
 
 author_name:
   help: Your full name (used in the project metadata)
