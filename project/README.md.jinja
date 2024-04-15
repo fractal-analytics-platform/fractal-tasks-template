@@ -31,30 +31,45 @@ python -m pip install -e ".[dev]"
 4. The template already includes a sample task ("Thresholding Task"). Whenever
 you change its input parameters or docstring, re-run
 ```console
-python src/{{package_name}}/dev/update_manifest.py
+python src/{{package_name}}/dev/create_manifest.py
 git add src/{{package_name}}/__FRACTAL_MANIFEST__.json
 git commit -m'Update `__FRACTAL_MANIFEST__.json`'
 git push origin main
 ```
 
-5. If you add a new task, you should also add a new item to the `task_list`
-property in `src/{{package_name}}/__FRACTAL_MANIFEST__.json`. A minimal example
-may look like
-```json
-    {
-      "name": "My Second Task",
-      "executable": "my_second_task.py",
-      "input_type": "zarr",
-      "output_type": "zarr",
-      "meta": {
-        "some-property": "some-value"
-      },
-    }
+5. If you add a new task, you should also add a new item to the `TASK_LIST`
+list, in `src/{{package_name}}/dev/task_list.py`. Here is an example:
+```python
+from fractal_tasks_core.dev.task_models import NonParallelTask
+from fractal_tasks_core.dev.task_models import ParallelTask
+from fractal_tasks_core.dev.task_models import CompoundTask
+
+
+TASK_LIST = [
+    NonParallelTask(
+        name="My non-parallel task",
+        executable="my_non_parallel_task.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+    ),
+    ParallelTask(
+        name="My parallel task",
+        executable="my_parallel_task.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+    ),
+    CompoundTask(
+        name="My compound task",
+        executable_init="my_task_init.py",
+        executable="my_actual_task.py",
+        meta_init={"cpus_per_task": 1, "mem": 4000},
+        meta={"cpus_per_task": 2, "mem": 12000},
+    ),
+]
 ```
 Notes:
 
 * After adding a task, you should also update the manifest (see point 4 above).
-* The minimal example above also includes the `meta` task property; this is optional, and you can remove it if it is not needed.
+* The minimal example above also includes the `meta` and/or `meta_init` task properties; these are optional, and you can remove them if not needed.
+* More details on Fractal tasks will be soon available at https://fractal-analytics-platform.github.io.
 
 6. Run the test suite (with somewhat verbose logging) through
 ```console
