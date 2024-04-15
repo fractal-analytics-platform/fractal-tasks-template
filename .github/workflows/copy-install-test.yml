@@ -1,0 +1,26 @@
+name: copy-install-test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  poetry_update:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Install copier
+        run: pipx install copier
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: copy-install-test
+        run: ./tests/copy-install-test.sh
+
+
