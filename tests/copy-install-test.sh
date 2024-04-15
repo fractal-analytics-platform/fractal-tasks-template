@@ -1,10 +1,12 @@
 #!/bin/bash
-set -euo
+
+# Exit immediately if a command exits with a non-zero status
+set -e
 
 # Create empty folder (fail if it already exists)
 FOLDER="/tmp/new-project-folder"
 
-# Generate a new project based on the root-directory template
+# Generate a new project based on the HEAD git reference
 echo "Now generate a new project copy in $FOLDER"
 copier copy . "$FOLDER" --data-file tests/answers.yml --vcs-ref=HEAD
 
