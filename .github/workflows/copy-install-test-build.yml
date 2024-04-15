@@ -1,4 +1,4 @@
-name: copy-install-test
+name: copy-install-test-build
 
 on:
   push:
@@ -21,6 +21,4 @@ jobs:
           python-version: "3.10"
 
       - name: copy-install-test
-        run: ./tests/copy-install-test.sh
-
-
+        run: ./tests/copy-install-test-build.sh
