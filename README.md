@@ -33,11 +33,8 @@ appropriate file/folder names).
 
 ### 2. Initialize `git`/GitLab/GitHub repository (first-time only)
 
-After creating the repository, you may want to initialize a `git` repository.
-This step is recommended, but not strictly required for [step
-3](#3-start-developing) below (the development phase); however it becomes
-necessary in case you want to fetch an updated template version (as in [step
-4](#4-fetch-template-updates)).
+After creating the repository, you need to initialize a `git` repository.
+This step is required because in this template, we use git tags to manage the versioning of the package.
 
 You can create a `git` repository based on the current folder via
 ```console
@@ -45,6 +42,10 @@ cd <your-package-name>
 git init
 git add .
 git commit -m 'Initial commit'
+```
+Then you can create a first tag, e.g. for version 0.1.0, via
+```console
+git tag -a 0.1.0 -m 'Initial version'
 ```
 
 This is enough for local tracking of your package, but you may want to also keep a remote copy of your repository. To do so in GitLab or GitHub, for instance, follow the instructions in:
@@ -54,8 +55,7 @@ This is enough for local tracking of your package, but you may want to also keep
 ### 3. Start developing
 
 Your customized instance of the template is now ready, and you can start
-developing. Specific instructions are available in the `README.md` file within
-the root folder of the repository.
+developing. Specific instructions on how to install your package, managing your environment, versioning and more can be found in the [DEVELOPERS_GUIDE](https://github.com/fractal-analytics-platform/fractal-tasks-template/DEVELOPERS_GUIDE.md).
 
 ### 4. Fetch template updates
 
