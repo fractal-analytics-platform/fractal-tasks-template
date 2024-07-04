@@ -1,6 +1,7 @@
 """
 This is the Python module for my_task
 """
+
 import logging
 from typing import Any
 from typing import Optional
@@ -152,9 +153,7 @@ def process_img(
 
 
 def generate_label_attrs(
-    ngff_image_meta: NgffImageMeta, 
-    label_name: str, 
-    downsample: int = 0
+    ngff_image_meta: NgffImageMeta, label_name: str, downsample: int = 0
 ) -> dict[str, Any]:
     """
     Generates the label OME-zarr attrs based on the image metadata
