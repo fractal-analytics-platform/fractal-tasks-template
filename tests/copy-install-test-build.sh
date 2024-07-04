@@ -29,4 +29,4 @@ python3 src/my_project/dev/create_manifest.py
 python3 -m pytest tests
 
 # Build package
-python3 -m build
+hatch build
