@@ -6,6 +6,7 @@
 > `--vcs-ref=v0.1.3` to the `copier copy` command below.
 
 
+
 This is a template for a Python package of tasks that can be used within [the
 Fractal framework](https://fractal-analytics-platform.github.io/). This
 template is largely inspired by https://github.com/pydev-guide/pyrepo-copier.
