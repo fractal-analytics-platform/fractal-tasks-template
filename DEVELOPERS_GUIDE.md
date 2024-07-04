@@ -7,7 +7,7 @@ for details.
 
 ### Getting started
 
-1. It is recommended to work from an isolated Python virtual environment, we suggest using `mamba` to create the environment. You can install it via [`conda`](https://docs.conda.io/en/latest/miniconda.html).
+1. It is recommended to work from an isolated Python virtual environment, we suggest using `mamba` to create the environment. You can install it via [miniforge](https://github.com/conda-forge/miniforge).
 
 2. Once you have `mamba` installed, you can create the virtual environment using the following command:
 ```console
@@ -15,15 +15,15 @@ mamba create -n name-env python=3.8
 ```
 In order to use the conda environment, you need to activate it:
 ```console
-conda activate name-env
+mamba activate name-env
 ```
 and once you are done with the environment, you can deactivate it:
 ```console
-conda deactivate
+mamba deactivate
 ```
 or, simply close the terminal.
 
-3. You can install your package to run it locally as in:
+1. You can install your package to run it locally as in:
 ```console
 python -m pip install -e .
 ```
@@ -40,9 +40,9 @@ git commit -m'Update `__FRACTAL_MANIFEST__.json`'
 git push origin main
 ```
 
-2. A full walkthrough of the task development process can be found in the [Fractal documentation](https://fractal-analytics-platform.github.io) or following the [Build your own fractal task](https://fractal-analytics-platform.github.io/build_your_own_fractal_task/) video tutorial.
+1. A full walkthrough of the task development process can be found in the [Fractal documentation](https://fractal-analytics-platform.github.io) or following the [Build your own fractal task](https://fractal-analytics-platform.github.io/build_your_own_fractal_task/) video tutorial.
 
-3. If you add a new task, you should also add a new item to the `TASK_LIST`
+2. If you add a new task, you should also add a new item to the `TASK_LIST`
 list, in `src/{{package_name}}/dev/task_list.py`. Here is an example:
 ```python
 from fractal_tasks_core.dev.task_models import NonParallelTask
