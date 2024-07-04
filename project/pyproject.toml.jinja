@@ -1,7 +1,27 @@
+# https://peps.python.org/pep-0517/
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+# https://hatch.pypa.io/latest/config/metadata/
+[tool.hatch.version]
+source = "vcs"
+
+# read more about configuring hatch at:
+# https://hatch.pypa.io/latest/config/build/
+[tool.hatch.build.targets.wheel]
+only-include = ["src"]
+sources = ["src"]
+
+# Always include the __FRACTAL_MANIFEST__.json file in the package
+[tool.hatch.build]
+include = ["__FRACTAL_MANIFEST__.json"]
+
+
 # Project metadata (see https://peps.python.org/pep-0621)
 [project]
 name = "{{project_name}}"
-version = "0.0.1"
+dynamic = ["version"]
 description = "{{ project_short_description }}"
 readme = "README.md"
 license = { text = "{{ project_license }}" }
@@ -16,17 +36,4 @@ dependencies = ["fractal-tasks-core == 1.0.0a3", "scikit-image"]
 # Optional dependencies (e.g. for `pip install -e ".[dev]"`, see
 # https://peps.python.org/pep-0621/#dependencies-optional-dependencies)
 [project.optional-dependencies]
-dev = ["devtools", "pytest", "requests", "build", "jsonschema"]
-
-# Build options (see https://peps.python.org/pep-0517)
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["{{package_name}}"]
-
-# Always include the __FRACTAL_MANIFEST__.json file in the package
-[tool.setuptools.package-data]
-"*" = ["__FRACTAL_MANIFEST__.json"]
+dev = ["devtools", "pytest", "requests", "build", "jsonschema", "ruff", "pre-commit"]
