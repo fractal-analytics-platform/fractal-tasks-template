@@ -14,12 +14,12 @@ copier copy . "$FOLDER" --data-file tests/answers.yml --vcs-ref=HEAD
 cd "$FOLDER"
 
 # Initialize git (needed for versioning)
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
-git init
-git add .
-git commit -m "Initial commit"
-git tag -a "0.1.0" -m "First release"
+# git config --global user.email "you@example.com"
+# git config --global user.name "Your Name"
+# git init
+# git add .
+# git commit -m "Initial commit"
+# git tag -a "0.1.0" -m "First release"
 
 # Install the new project
 python3 -m pip install -e .[dev]
