@@ -5,7 +5,8 @@ build-backend = "hatchling.build"
 
 # https://hatch.pypa.io/latest/config/metadata/
 [tool.hatch.version]
-path = "src/{{package_name}}/__init__.py"
+#path = "src/{{package_name}}/__init__.py"
+source = "vcs"
 
 # read more about configuring hatch at:
 # https://hatch.pypa.io/latest/config/build/
