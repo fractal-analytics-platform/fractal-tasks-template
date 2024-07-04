@@ -100,3 +100,11 @@ hatch build
 This command will create the release distribution files in the `dist` folder.
 The wheel one (ending with `.whl`) is the one you can use to collect your tasks
 within Fractal.
+
+## Pre-commit
+This template uses `pre-commit` to run some checks before committing your changes. You set up pre-commit it via:
+```console
+pre-commit install
+```
+This will install the pre-commit hooks in your `.git/hooks` directory, and they will run every time you commit changes.
+This is particularly useful when working with other people, as it ensures that the code is formatted homogeneously.
