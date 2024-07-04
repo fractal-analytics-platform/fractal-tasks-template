@@ -4,7 +4,7 @@
 set -e
 
 # Create empty folder (fail if it already exists)
-FOLDER="tmp/new-project-folder"
+FOLDER="../tmp/new-project-folder"
 
 # Generate a new project based on the HEAD git reference
 echo "Now generate a new project copy in $FOLDER"

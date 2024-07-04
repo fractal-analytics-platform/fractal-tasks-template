@@ -1,6 +1,4 @@
-"""
-This is the Python module for my_task
-"""
+"""This is the Python module for my_task."""
 
 import logging
 from typing import Any
