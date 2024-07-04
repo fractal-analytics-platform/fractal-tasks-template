@@ -12,6 +12,8 @@ copier copy . "$FOLDER" --data-file tests/answers.yml --vcs-ref=HEAD
 
 # Move to the new folder
 cd "$FOLDER"
+
+# Initialize git (needed for versioning)
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 git init
