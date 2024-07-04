@@ -7,12 +7,8 @@ repos:
       - id: validate-pyproject
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.3
+    rev: v0.5.0
     hooks:
       - id: ruff
-        args: [--fix]
-
-  - repo: https://github.com/psf/black
-    rev: 23.10.1
-    hooks:
-      - id: black
+        #args: [--fix]
+      - id: ruff-format
