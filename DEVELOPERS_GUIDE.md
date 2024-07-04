@@ -11,8 +11,9 @@ for details.
 
 2. Once you have `mamba` installed, you can create the virtual environment using the following command:
 ```console
-mamba create -n name-env python=3.8
+mamba create -n name-env python=3.10
 ```
+Here we used python 3.10 as an example, you can alternatively use `python=3.9` or `python=3.11`.
 In order to use the conda environment, you need to activate it:
 ```console
 mamba activate name-env
