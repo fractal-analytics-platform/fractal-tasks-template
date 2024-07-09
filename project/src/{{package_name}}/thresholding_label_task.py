@@ -17,7 +17,7 @@ from fractal_tasks_core.ngff import load_NgffImageMeta
 from fractal_tasks_core.ngff.specs import NgffImageMeta
 from fractal_tasks_core.pyramids import build_pyramid
 from fractal_tasks_core.utils import rescale_datasets
-from pydantic.decorator import validate_arguments
+from pydantic.v1.decorator import validate_arguments
 from skimage.measure import label
 from skimage.morphology import ball, dilation, opening, remove_small_objects
 
