@@ -1,28 +1,25 @@
-"""
-This is the Python module for my_task
-"""
+"""This is the Python module for my_task."""
+
 import logging
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
 import dask.array as da
 import fractal_tasks_core
 import numpy as np
 import zarr
-from fractal_tasks_core.channels import ChannelInputModel
-from fractal_tasks_core.channels import get_channel_from_image_zarr
-from fractal_tasks_core.channels import OmeroChannel
+from fractal_tasks_core.channels import (
+    ChannelInputModel,
+    OmeroChannel,
+    get_channel_from_image_zarr,
+)
 from fractal_tasks_core.labels import prepare_label_group
 from fractal_tasks_core.ngff import load_NgffImageMeta
 from fractal_tasks_core.ngff.specs import NgffImageMeta
 from fractal_tasks_core.pyramids import build_pyramid
 from fractal_tasks_core.utils import rescale_datasets
-from pydantic.decorator import validate_arguments
+from pydantic.v1.decorator import validate_arguments
 from skimage.measure import label
-from skimage.morphology import ball
-from skimage.morphology import dilation
-from skimage.morphology import opening
-from skimage.morphology import remove_small_objects
+from skimage.morphology import ball, dilation, opening, remove_small_objects
 
 __OME_NGFF_VERSION__ = fractal_tasks_core.__OME_NGFF_VERSION__
 
@@ -37,8 +34,7 @@ def thresholding_label_task(
     min_size: int = 50,
     overwrite: bool = True,
 ) -> None:
-    """
-    Threshold an image and find connected components
+    """Threshold an image and find connected components.
 
     Args:
         zarr_url: Absolute path to the OME-Zarr image.
@@ -48,7 +44,6 @@ def thresholding_label_task(
         min_size: Minimum size of objects. Smaller objects are filtered out.
         overwrite: Whether to overwrite an existing label image
     """
-
     # Use the first of input_paths
     logging.info(f"{zarr_url=}")
 
@@ -88,9 +83,7 @@ def thresholding_label_task(
     # image, set the downsample variable to the number of downsamplings
     # required (e.g. 2 if the image is downsampled 4x per axis with an
     # ngff_image_meta.coarsening_xy of 2)
-    label_attrs = generate_label_attrs(
-        ngff_image_meta, label_name, downsample=0
-    )
+    label_attrs = generate_label_attrs(ngff_image_meta, label_name, downsample=0)
     label_group = prepare_label_group(
         image_group=zarr.group(zarr_url),
         label_name=label_name,
@@ -117,11 +110,8 @@ def thresholding_label_task(
     )
 
 
-def process_img(
-    int_img: np.array, threshold: int, min_size: int = 50
-) -> np.array:
-    """
-    Image processing function, to be replaced with your custom logic
+def process_img(int_img: np.array, threshold: int, min_size: int = 50) -> np.array:
+    """Image processing function, to be replaced with your custom logic
 
     Numpy image & parameters in, label image out
 
@@ -152,12 +142,9 @@ def process_img(
 
 
 def generate_label_attrs(
-    ngff_image_meta: NgffImageMeta, 
-    label_name: str, 
-    downsample: int = 0
+    ngff_image_meta: NgffImageMeta, label_name: str, downsample: int = 0
 ) -> dict[str, Any]:
-    """
-    Generates the label OME-zarr attrs based on the image metadata
+    """Generates the label OME-zarr attrs based on the image metadata
 
     Args:
         ngff_image_meta: image meta object for the corresponding NGFF image
@@ -172,8 +159,7 @@ def generate_label_attrs(
     """
     new_datasets = rescale_datasets(
         datasets=[
-            dataset.dict(exclude_none=True)
-            for dataset in ngff_image_meta.datasets
+            dataset.dict(exclude_none=True) for dataset in ngff_image_meta.datasets
         ],
         coarsening_xy=ngff_image_meta.coarsening_xy,
         reference_level=downsample,

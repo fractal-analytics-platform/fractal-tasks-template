@@ -13,6 +13,14 @@ copier copy . "$FOLDER" --data-file tests/answers.yml --vcs-ref=HEAD
 # Move to the new folder
 cd "$FOLDER"
 
+# Initialize git (needed for versioning)
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+git init
+git add .
+git commit -m "Initial commit"
+git tag -a "0.1.0" -m "First release"
+
 # Install the new project
 python3 -m pip install -e .[dev]
 
@@ -23,4 +31,4 @@ python3 src/my_project/dev/create_manifest.py
 python3 -m pytest tests
 
 # Build package
-python3 -m build
+hatch build
