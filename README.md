@@ -1,12 +1,5 @@
 # Fractal tasks-package template
 
-> WARNING: This template generates task packages that are compatible with the
-> current Fractal (i.e., `fractal-server` version 2). The template for legacy
-> Fractal is not supported any more, but it can still be accessed by adding
-> `--vcs-ref=v0.1.3` to the `copier copy` command below.
-
-
-
 This is a template for a Python package of tasks that can be used within [the
 Fractal framework](https://fractal-analytics-platform.github.io/). This
 template is largely inspired by https://github.com/pydev-guide/pyrepo-copier.
@@ -75,3 +68,8 @@ copier update
 ```
 See [copier docs](https://copier.readthedocs.io/en/stable/updating) for more
 details.
+
+> WARNING: This template generates task packages that are compatible with the
+> current Fractal (i.e., `fractal-server` version 2). The template for legacy
+> Fractal is not supported any more, but it can still be accessed by adding
+> `--vcs-ref=v0.1.3` to the `copier copy` command below.
