@@ -1,6 +1,6 @@
 ## Development instructions
 
-This instructions are only relevant *after* you completed both the `copier
+These instructions are only relevant *after* you completed both the `copier
 copy` command and the git/GitLab/GitHub initialization phase - see
 [README](https://github.com/fractal-analytics-platform/fractal-tasks-template#readme)
 for details.
@@ -24,7 +24,7 @@ mamba deactivate
 ```
 or, simply close the terminal.
 
-1. You can install your package to run it locally as in:
+3. You can install your package to run it locally as in (run from within your package folder):
 ```console
 python -m pip install -e .
 ```
@@ -33,17 +33,17 @@ this will install only the dependencies needed to run the package. If you want t
 python -m pip install -e ".[dev]"
 ```
 ## Task development instructions
-1. The template already includes a sample task ("Thresholding Task"). Whenever you change its input parameters or docstring, re-run
+1. The template already includes a sample task ("Thresholding Label Task"). Whenever you change its input parameters or docstring, re-run
 ```console
 python src/{{package_name}}/dev/create_manifest.py
 git add src/{{package_name}}/__FRACTAL_MANIFEST__.json
-git commit -m'Update `__FRACTAL_MANIFEST__.json`'
+git commit -m 'Update `__FRACTAL_MANIFEST__.json`'
 git push origin main
 ```
 
-1. A full walkthrough of the task development process can be found in the [Fractal documentation](https://fractal-analytics-platform.github.io) or following the [Build your own fractal task](https://fractal-analytics-platform.github.io/build_your_own_fractal_task/) video tutorial.
+2. A full walkthrough of the task development process can be found in the [Build your own fractal task](https://fractal-analytics-platform.github.io/build_your_own_fractal_task/) documentation & video tutorial.
 
-2. If you add a new task, you should also add a new item to the `TASK_LIST`
+3. If you add a new task, you should also add a new item to the `TASK_LIST`
 list, in `src/{{package_name}}/dev/task_list.py`. Here is an example:
 ```python
 from fractal_tasks_core.dev.task_models import NonParallelTask
@@ -92,9 +92,11 @@ git tag -a va.b.c -m 'Name of the release'
 ```
 where `a`, `b`, `c` are the major, minor and patch version numbers respectively.
 
+You can also add tags directly on Github.
+
 ## Building the package
 
-1. In order to build the package, you can use `hatch`. You can build the package by running the following command:
+In order to build the package, use `hatch`. You can build the package by running the following command:
 ```console
 hatch build
 ```
