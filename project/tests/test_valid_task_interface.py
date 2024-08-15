@@ -26,13 +26,13 @@ def validate_command(cmd: str):
     stderr = result.stderr.decode()
     debug(stderr)
 
-    # Valid stderr includes pydantic.error_wrappers.ValidationError (type
+    # Valid stderr includes pydantic.v1.error_wrappers.ValidationError (type
     # match between model and function, but tmp_file_args has wrong arguments)
-    assert "pydantic.v1.error_wrappers.ValidationError" in stderr
+    assert "ValidationError" in stderr
 
-    # Valid stderr must include a mention of "unexpected keyword arguments",
+    # Valid stderr must include a mention of "Unexpected keyword argument",
     # because we are including some invalid arguments
-    assert "unexpected keyword arguments" in stderr
+    assert "Unexpected keyword argument" in stderr
 
     # Invalid stderr includes ValueError
     assert "ValueError" not in stderr
