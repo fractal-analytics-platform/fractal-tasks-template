@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "update_to_fractal_task_core_1_2"]
 
 jobs:
   copy_install_test_build:
