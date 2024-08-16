@@ -32,6 +32,3 @@ python3 -m pytest tests
 
 # Build package
 hatch build
-
-# Sanity to be removed
-echo "Sanity check"
