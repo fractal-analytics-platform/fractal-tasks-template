@@ -2,20 +2,20 @@ import json
 from pathlib import Path
 
 import pytest
-from jsonschema.validators import Draft201909Validator
-from jsonschema.validators import Draft202012Validator
-from jsonschema.validators import Draft7Validator
-
 from fractal_tasks_core.dev.lib_args_schemas import (
     create_schema_for_single_task,
 )
-from fractal_tasks_core.dev.lib_signature_constraints import _extract_function
 from fractal_tasks_core.dev.lib_signature_constraints import (
+    _extract_function,
     _validate_function_signature,
+)
+from jsonschema.validators import (
+    Draft7Validator,
+    Draft201909Validator,
+    Draft202012Validator,
 )
 
 from . import TASK_LIST
-
 
 
 def test_task_functions_have_valid_signatures():

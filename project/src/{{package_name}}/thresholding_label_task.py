@@ -17,14 +17,14 @@ from fractal_tasks_core.ngff import load_NgffImageMeta
 from fractal_tasks_core.ngff.specs import NgffImageMeta
 from fractal_tasks_core.pyramids import build_pyramid
 from fractal_tasks_core.utils import rescale_datasets
-from pydantic.v1.decorator import validate_arguments
+from pydantic import validate_call
 from skimage.measure import label
 from skimage.morphology import ball, dilation, opening, remove_small_objects
 
 __OME_NGFF_VERSION__ = fractal_tasks_core.__OME_NGFF_VERSION__
 
 
-@validate_arguments
+@validate_call
 def thresholding_label_task(
     *,
     zarr_url: str,
