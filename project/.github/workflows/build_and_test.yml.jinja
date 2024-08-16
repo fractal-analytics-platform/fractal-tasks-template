@@ -18,8 +18,8 @@ jobs:
             python-version: '3.9'
           - os: macos-latest
             python-version: '3.10'
-    name: "Core, Python ${{ matrix.python-version }}, ${{ matrix.os }}"
-    runs-on: ${{ matrix.os }}
+    name: "Core, Python ${{ '{{' }} matrix.python-version {{ '}}' }}, ${{ '{{' }} matrix.os {{ '}}' }}"
+    runs-on: ${{ '{{' }} matrix.os {{ '}}' }}
     timeout-minutes: 10
 
     steps:
@@ -27,10 +27,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ '{{' }} matrix.python-version {{ '}}' }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ '{{' }} matrix.python-version {{ '}}' }}
           cache: "pip"
 
       - name: Install package
