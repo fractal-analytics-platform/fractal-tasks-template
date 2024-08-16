@@ -48,7 +48,7 @@ This is enough for local tracking of your package, but you may want to also keep
 ### 3. Start developing
 
 Your customized instance of the template is now ready, and you can start
-developing. Specific instructions on how to install your package, managing your environment, versioning and more can be found in the [DEVELOPERS_GUIDE](https://github.com/fractal-analytics-platform/fractal-tasks-template/DEVELOPERS_GUIDE.md).
+developing. Specific instructions on how to install your package, managing your environment, versioning and more can be found in the [DEVELOPERS_GUIDE](https://github.com/fractal-analytics-platform/fractal-tasks-template/blob/main/DEVELOPERS_GUIDE.md).
 
 ### 4. Fetch template updates
 
