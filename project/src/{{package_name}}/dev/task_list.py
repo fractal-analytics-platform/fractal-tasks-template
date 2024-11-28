@@ -10,6 +10,7 @@ TASK_LIST = [
         category="Segmentation",
         tags=[
             "Instance Segmentation",
+            "Classical segmentation"
         ],
     ),
 ]
