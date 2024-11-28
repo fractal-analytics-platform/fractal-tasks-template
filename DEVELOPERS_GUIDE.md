@@ -56,11 +56,15 @@ TASK_LIST = [
         name="My non-parallel task",
         executable="my_non_parallel_task.py",
         meta={"cpus_per_task": 1, "mem": 4000},
+        category="Conversion",
+        modality="HCS",
     ),
     ParallelTask(
         name="My parallel task",
         executable="my_parallel_task.py",
         meta={"cpus_per_task": 1, "mem": 4000},
+        category="Image Processing",
+        tags=["Preprocessing"],
     ),
     CompoundTask(
         name="My compound task",
@@ -68,9 +72,25 @@ TASK_LIST = [
         executable="my_actual_task.py",
         meta_init={"cpus_per_task": 1, "mem": 4000},
         meta={"cpus_per_task": 2, "mem": 12000},
+        category="Segmentation",
+        tags=[
+            "Deep Learning",
+            "Convolutional Neural Network",
+            "Instance Segmentation",
+        ],
     ),
 ]
 ```
+
+6. Add task metadata
+To make sure that other Fractal users can find your task it's essential to fill the metadata in the `TASK_LIST`
+
+Allowed metadata are:
+
+* Category (Optional): The type of task implemented. Possible standard choices are "Segmentation," "Conversion," "Image Processing," and "Registration."
+* Modality (Optional): The type of data modality supported, for example, "HCS".
+* Tags (Optional): A free list of additional tags assigned to your data.
+
 Notes:
 
 * After adding a task, you should also update the manifest (see point 1/ above).
