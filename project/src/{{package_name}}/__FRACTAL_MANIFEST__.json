@@ -3,6 +3,10 @@
   "task_list": [
     {
       "name": "Thresholding Label Task",
+      "category": "Segmentation",
+      "tags": [
+        "Instance Segmentation"
+      ],
       "executable_parallel": "thresholding_label_task.py",
       "meta_parallel": {
         "cpus_per_task": 1,
