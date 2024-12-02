@@ -114,8 +114,10 @@ where `a`, `b`, `c` are the major, minor and patch version numbers respectively.
 
 You can also add tags directly on Github.
 
-Upon a tag push, even a special CI pipeline will be triggered, which will build the package and upload the wheel in your repository's `releases` section.
-When you are ready to publish your package on PyPI, you can do so by creating a new PyPI project and removing the line `if: false` from the `Publish to PyPI` step in `build_and_test.yml`
+Upon a tag push, a special CI pipeline will be triggered, which will build the package and upload the wheel in your repository's `releases` section.
+When you are ready to publish your package on PyPI, you can do so by creating a new PyPI project and removing the line `if: false` from the `Publish to PyPI` step in `build_and_test.yml`.
+
+Note that this requires some preliminary steps on PyPI, like setting up an account, creating a project, and setting up a "trusted publisher" that links your repository to PyPI - see https://docs.pypi.org/trusted-publishers.
 
 ## Building the package
 
