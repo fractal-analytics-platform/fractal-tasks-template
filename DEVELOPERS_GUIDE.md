@@ -56,11 +56,15 @@ TASK_LIST = [
         name="My non-parallel task",
         executable="my_non_parallel_task.py",
         meta={"cpus_per_task": 1, "mem": 4000},
+        category="Conversion",
+        modality="HCS",
     ),
     ParallelTask(
         name="My parallel task",
         executable="my_parallel_task.py",
         meta={"cpus_per_task": 1, "mem": 4000},
+        category="Image Processing",
+        tags=["Preprocessing"],
     ),
     CompoundTask(
         name="My compound task",
@@ -68,9 +72,25 @@ TASK_LIST = [
         executable="my_actual_task.py",
         meta_init={"cpus_per_task": 1, "mem": 4000},
         meta={"cpus_per_task": 2, "mem": 12000},
+        category="Segmentation",
+        tags=[
+            "Deep Learning",
+            "Convolutional Neural Network",
+            "Instance Segmentation",
+        ],
     ),
 ]
 ```
+
+6. Add task metadata
+To make sure that other Fractal users can find your task it's essential to fill the metadata in the `TASK_LIST`
+
+Allowed metadata are:
+
+* Category (Optional): The type of task implemented. Possible standard choices are "Segmentation," "Conversion," "Image Processing," and "Registration."
+* Modality (Optional): The type of data modality supported, for example, "HCS".
+* Tags (Optional): A free list of additional tags assigned to your data.
+
 Notes:
 
 * After adding a task, you should also update the manifest (see point 1/ above).
@@ -93,6 +113,11 @@ git tag -a va.b.c -m 'Name of the release'
 where `a`, `b`, `c` are the major, minor and patch version numbers respectively.
 
 You can also add tags directly on Github.
+
+Upon a tag push, a special CI pipeline will be triggered, which will build the package and upload the wheel in your repository's `releases` section.
+When you are ready to publish your package on PyPI, you can do so by creating a new PyPI project and removing the line `if: false` from the `Publish to PyPI` step in `build_and_test.yml`.
+
+Note that this requires some preliminary steps on PyPI, like setting up an account, creating a project, and setting up a "trusted publisher" that links your repository to PyPI - see https://docs.pypi.org/trusted-publishers.
 
 ## Building the package
 
