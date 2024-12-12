@@ -8,4 +8,7 @@ if __name__ == "__main__":
     PACKAGE = "{{package_name}}"
     AUTHORS = "{{author_name}}"
     docs_link = "{{project_url}}"
-    create_manifest(package=PACKAGE, authors=AUTHORS, docs_link=docs_link)
+    if docs_link:
+        create_manifest(package=PACKAGE, authors=AUTHORS, docs_link=docs_link)
+    else:
+        create_manifest(package=PACKAGE, authors=AUTHORS)
