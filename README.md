@@ -68,8 +68,3 @@ copier update
 ```
 See [copier docs](https://copier.readthedocs.io/en/stable/updating) for more
 details.
-
-> WARNING: This template generates task packages that are compatible with the
-> current Fractal (i.e., `fractal-server` version 2). The template for legacy
-> Fractal is not supported any more, but it can still be accessed by adding
-> `--vcs-ref=v0.1.3` to the `copier copy` command below.
