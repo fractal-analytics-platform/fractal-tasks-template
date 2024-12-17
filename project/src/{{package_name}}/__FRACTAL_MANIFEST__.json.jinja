@@ -5,8 +5,10 @@
       "name": "Thresholding Label Task",
       "category": "Segmentation",
       "tags": [
-        "Instance Segmentation"
+        "Instance Segmentation",
+        "Classical segmentation"
       ],
+      "docs_info": "### Purpose\n- Description of task functionality: Threshold an image and find connected components.\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
       "executable_parallel": "thresholding_label_task.py",
       "meta_parallel": {
         "cpus_per_task": 1,
@@ -74,8 +76,7 @@
         ],
         "type": "object",
         "title": "ThresholdingLabelTask"
-      },
-      "docs_info": "## thresholding_label_task\nThreshold an image and find connected components.\n"
+      }
     }
   ],
   "has_args_schemas": true,

@@ -12,5 +12,6 @@ TASK_LIST = [
             "Instance Segmentation",
             "Classical segmentation"
         ],
+        docs_info="file:docs_info/thresholding_task.md"
     ),
 ]
