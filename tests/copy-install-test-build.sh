@@ -25,7 +25,7 @@ git tag -a "0.1.0" -m "First release"
 python3 -m pip install -e .[dev]
 
 # Generate the manifest
-python3 -m fractal_task_tools fractal-manifest create --package my_project
+fractal-manifest create --package my_project
 
 # Run tests
 python3 -m pytest tests
