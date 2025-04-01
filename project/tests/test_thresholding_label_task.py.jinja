@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from devtools import debug
-from fractal_tasks_core.channels import ChannelInputModel
 
 from {{package_name}}.thresholding_label_task import thresholding_label_task
 
@@ -24,5 +23,5 @@ def test_thresholding_label_task(test_data_dir):
     thresholding_label_task(
         zarr_url=test_data_dir,
         threshold=180,
-        channel=ChannelInputModel(label="DAPI")
+        channel="DAPI"
     )

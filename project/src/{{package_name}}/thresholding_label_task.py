@@ -1,27 +1,13 @@
 """This is the Python module for my_task."""
 
 import logging
-from typing import Any, Optional
+from typing import Optional
 
-import dask.array as da
-import fractal_tasks_core
 import numpy as np
-import zarr
-from fractal_tasks_core.channels import (
-    ChannelInputModel,
-    OmeroChannel,
-    get_channel_from_image_zarr,
-)
-from fractal_tasks_core.labels import prepare_label_group
-from fractal_tasks_core.ngff import load_NgffImageMeta
-from fractal_tasks_core.ngff.specs import NgffImageMeta
-from fractal_tasks_core.pyramids import build_pyramid
-from fractal_tasks_core.utils import rescale_datasets
+from ngio import open_ome_zarr_container
 from pydantic import validate_call
 from skimage.measure import label
 from skimage.morphology import ball, dilation, opening, remove_small_objects
-
-__OME_NGFF_VERSION__ = fractal_tasks_core.__OME_NGFF_VERSION__
 
 
 @validate_call
@@ -29,7 +15,7 @@ def thresholding_label_task(
     *,
     zarr_url: str,
     threshold: int,
-    channel: ChannelInputModel,
+    channel: str,
     label_name: Optional[str] = None,
     min_size: int = 50,
     overwrite: bool = True,
@@ -39,7 +25,7 @@ def thresholding_label_task(
     Args:
         zarr_url: Absolute path to the OME-Zarr image.
         threshold: Threshold value to be applied.
-        channel: Channel to be thresholded.
+        channel: Channel label to be thresholded.
         label_name: Name of the resulting label image
         min_size: Minimum size of objects. Smaller objects are filtered out.
         overwrite: Whether to overwrite an existing label image
@@ -47,83 +33,61 @@ def thresholding_label_task(
     # Use the first of input_paths
     logging.info(f"{zarr_url=}")
 
-    # Parse and log several NGFF-image metadata attributes
-    ngff_image_meta = load_NgffImageMeta(zarr_url)
-    logging.info(f"  Axes: {ngff_image_meta.axes_names}")
-    logging.info(f"  Number of pyramid levels: {ngff_image_meta.num_levels}")
-    logging.info(
-        "Full-resolution ZYX pixel sizes (micrometer): "
-        f"{ngff_image_meta.get_pixel_sizes_zyx(level=0)}"
-    )
+    # Open the OME-Zarr container
+    ome_zarr = open_ome_zarr_container(zarr_url)
 
-    # Find the channel metadata
-    channel_model: OmeroChannel = get_channel_from_image_zarr(
-        image_zarr_path=zarr_url,
-        wavelength_id=channel.wavelength_id,
-        label=channel.label,
-    )
+    logging.info(f"{ome_zarr=}")
 
-    # Set label name
-    if not label_name:
-        label_name = f"{channel_model.label}_thresholded"
+    image = ome_zarr.get_image()
+    logging.info(f"{image=}")
+
+    if channel not in image.channel_labels:
+        raise ValueError(
+            f"Channel {channel} not found in image channels: {image.channel_labels}"
+        )
+
+    channel_index = image.channel_labels.index(channel)
+    logging.info(f"channel {channel} found at index: {channel_index}")
 
     # Load the highest-resolution multiscale array through dask.array
-    array_zyx = da.from_zarr(f"{zarr_url}/0")[channel_model.index]
-    logging.info(f"{array_zyx=}")
+    array = image.get_array(c=channel_index, mode="numpy")
 
     # Process the image with an image processing approach of your choice
-    label_img = process_img(
-        array_zyx.compute(),
+    label_array = process_img(
+        array,
         threshold=threshold,
         min_size=min_size,
     )
+    
+    # Set label name
+    if not label_name:
+        label_name = f"{channel}_thresholded"
 
-    # Prepare label OME-Zarr
-    # If the resulting label image is of lower resolution than the intensity
-    # image, set the downsample variable to the number of downsamplings
-    # required (e.g. 2 if the image is downsampled 4x per axis with an
-    # ngff_image_meta.coarsening_xy of 2)
-    label_attrs = generate_label_attrs(ngff_image_meta, label_name, downsample=0)
-    label_group = prepare_label_group(
-        image_group=zarr.group(zarr_url),
-        label_name=label_name,
-        label_attrs=label_attrs,
-        overwrite=overwrite,
-    )
-    # Write the processed array back to the same full-resolution Zarr array
-    label_group.create_dataset(
-        "0",
-        data=label_img,
-        overwrite=overwrite,
-        dimension_separator="/",
-        chunks=array_zyx.chunksize,
-    )
+    label_image = ome_zarr.derive_label(name=label_name, overwrite=overwrite)
+    logging.info(f"Label image {label_name} created")
+    logging.info(f"{label_image=}")
 
-    # Starting from on-disk full-resolution data, build and write to disk a
-    # pyramid of coarser levels
-    build_pyramid(
-        zarrurl=f"{zarr_url}/labels/{label_name}",
-        overwrite=True,
-        num_levels=ngff_image_meta.num_levels,
-        coarsening_xy=ngff_image_meta.coarsening_xy,
-        aggregation_function=np.max,
-    )
+    label_image.set_array(patch=label_array)
+    label_image.consolidate()
+    logging.info("Label image set and consolidated")
 
 
-def process_img(int_img: np.array, threshold: int, min_size: int = 50) -> np.array:
+def process_img(int_img: np.ndarray, threshold: int, min_size: int = 50) -> np.ndarray:
     """Image processing function, to be replaced with your custom logic
 
     Numpy image & parameters in, label image out
 
     Args:
-        int_img: Intensity image as a numpy array
-        threshold: Thresholding value to binarize the image
-        min_size: Object size threshold for filtering
+        int_img (np.ndarray): Input image to be processed
+        threshold (int): Threshold value for binarization
+        min_size (int): Minimum size of objects to keep
 
     Returns:
-        label_img: np.array
+        label_img (np.ndarray): Labeled image
     """
     # Thresholding the image
+    int_img = np.squeeze(int_img)
+    
     binary_img = int_img >= threshold
 
     # Removing small objects
@@ -141,52 +105,7 @@ def process_img(int_img: np.array, threshold: int, min_size: int = 50) -> np.arr
     return label_img
 
 
-def generate_label_attrs(
-    ngff_image_meta: NgffImageMeta, label_name: str, downsample: int = 0
-) -> dict[str, Any]:
-    """Generates the label OME-zarr attrs based on the image metadata
-
-    Args:
-        ngff_image_meta: image meta object for the corresponding NGFF image
-        label_name: name of the newly generated label
-        downsample: How many levels the label image is downsampled from the
-            ngff_image_meta image (0 for no downsampling, 1 for downsampling
-            once by the coarsening factor etc.)
-
-    Returns:
-        label_attrs: Dict of new OME-Zarr label attrs
-
-    """
-    new_datasets = rescale_datasets(
-        datasets=[
-            dataset.dict(exclude_none=True) for dataset in ngff_image_meta.datasets
-        ],
-        coarsening_xy=ngff_image_meta.coarsening_xy,
-        reference_level=downsample,
-        remove_channel_axis=True,
-    )
-    label_attrs = {
-        "image-label": {
-            "version": __OME_NGFF_VERSION__,
-            "source": {"image": "../../"},
-        },
-        "multiscales": [
-            {
-                "name": label_name,
-                "version": __OME_NGFF_VERSION__,
-                "axes": [
-                    ax.dict()
-                    for ax in ngff_image_meta.multiscale.axes
-                    if ax.type != "channel"
-                ],
-                "datasets": new_datasets,
-            }
-        ],
-    }
-    return label_attrs
-
-
 if __name__ == "__main__":
-    from fractal_tasks_core.tasks._utils import run_fractal_task
+    from fractal_task_tools.task_wrapper import run_fractal_task
 
     run_fractal_task(task_function=thresholding_label_task)
