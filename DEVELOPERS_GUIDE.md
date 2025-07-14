@@ -86,6 +86,8 @@ list, in `src/{{package_name}}/dev/task_list.py`. Here is an example:
 from fractal_tasks_core.dev.task_models import NonParallelTask
 from fractal_tasks_core.dev.task_models import ParallelTask
 from fractal_tasks_core.dev.task_models import CompoundTask
+from fractal_tasks_core.dev.task_models import ConverterCompoundTask
+from fractal_tasks_core.dev.task_models import ConverterNonParallelTask
 
 
 TASK_LIST = [
@@ -116,6 +118,23 @@ TASK_LIST = [
             "Instance Segmentation",
         ],
     ),
+    ConverterCompoundTask(
+        name="My converter compound task",
+        executable_init="my_converter_task_init.py",
+        executable="my_converter_task.py",
+        meta_init={"cpus_per_task": 1, "mem": 4000},
+        meta={"cpus_per_task": 2, "mem": 12000},
+        category="Conversion",
+        tags=["Image Conversion", "HCS"],
+    ),
+    ConverterNonParallelTask(
+        name="My converter non-parallel task",
+        executable="my_converter_non_parallel_task.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Conversion",
+        modality="HCS",
+        tags=["Image Conversion", "HCS"],
+    )
 ]
 ```
 
