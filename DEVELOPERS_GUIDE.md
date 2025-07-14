@@ -9,7 +9,7 @@ for details.
 
 It is recommended to work from an isolated Python virtual environment, we suggest using either `mamba`, `pixi`, or `uv` to create the environment.
 
-<details><summary>### Install using `mamba`</summary>
+<details><summary><h3>Install using mamba</h3></summary>
 
 1. `mamba`: You can install it via [miniforge](https://github.com/conda-forge/miniforge).
 
@@ -49,7 +49,7 @@ It is recommended to work from an isolated Python virtual environment, we sugges
 
 </details>
 
-<details><summary><h3>Install using `uv`</h3></summary>
+<details><summary><h3>Install using uv</h3></summary>
 
 The `uv` package is a fast and lightweight alternative to `pip`, which can be used to create isolated Python environments.
 `uv` environments are stored in the project and can be easily recreated on different machines.
@@ -58,7 +58,7 @@ The `uv` package is a fast and lightweight alternative to `pip`, which can be us
 
 </details>
 
-<details><summary>### Install using `pixi`</summary>
+<details><summary><h3>Install using pixi</h3></summary>
 
 Like `uv`, `pixi` is an alternative to `pip` and `conda`, which can be used to create isolated Python environments.
 Compared to `uv`, `pixi` allows to create mixes of Pypi, conda, and non-Python dependencies, which can be useful for some tasks.
