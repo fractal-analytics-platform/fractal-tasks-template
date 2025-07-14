@@ -49,7 +49,7 @@ It is recommended to work from an isolated Python virtual environment, we sugges
 
 </details>
 
-<details><summary>### Install using `uv`</summary>
+<details><summary><h3>Install using `uv`</h3></summary>
 
 The `uv` package is a fast and lightweight alternative to `pip`, which can be used to create isolated Python environments.
 `uv` environments are stored in the project and can be easily recreated on different machines.
