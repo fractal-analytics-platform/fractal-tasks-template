@@ -8,7 +8,7 @@ FOLDER="/tmp/new-project-folder"
 
 # Generate a new project based on the HEAD git reference
 echo "Now generate a new project copy in $FOLDER"
-copier copy . "$FOLDER" --data-file tests/answers.yml --vcs-ref=HEAD
+copier copy . "$FOLDER" --data-file tests/copier/answers.yml --vcs-ref=HEAD
 
 # Move to the new folder
 cd "$FOLDER"
