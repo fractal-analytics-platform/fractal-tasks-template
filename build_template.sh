@@ -71,7 +71,6 @@ KEYWORD_MAP=(
     "${PACKAGE_NAME[@]}"
     "${PROJECT_URL[@]}"
     "${PROJECT_SHORT_DESCRIPTION[@]}"
-    "${segmentation_script_name[@]}"
     "${CI_PYTHON[@]}"
     "${CI_OS[@]}"
     "${SEGMENTATION_TASK_NAME[@]}"
@@ -97,7 +96,7 @@ RENAME_PROJECT=(
 ALL_RENAMES=(
     "${RENAME_TASK_SCRIPT[@]}"
     "${RENAME_DOC[@]}"
-    # "${RENAME_PROJECT[@]}"
+    "${RENAME_PROJECT[@]}"
 )
 
 # File names to be templatized (i.e., where keywords will be inserted in the file names)
@@ -162,6 +161,8 @@ for ((i=0; i<${#KEYWORD_MAP[@]}; i+=2)); do
         file="$file.jinja"
         search="${KEYWORD_MAP[i]}"
         replace="${KEYWORD_MAP[i+1]}"
+        echo "[build_template.sh] Replacing '$search' with '$replace' in $file."
+        # Preview the changes
         sed -i.bak "s/$search/$replace/g" "$file"
     done
 done

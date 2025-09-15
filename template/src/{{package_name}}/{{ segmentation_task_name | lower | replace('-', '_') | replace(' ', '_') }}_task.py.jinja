@@ -50,7 +50,7 @@ def segmentation_function(
 
 
 @validate_call
-def example_segmentation_task(
+def {{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task(
     *,
     # Fractal managed parameters
     zarr_url: str,
@@ -155,4 +155,4 @@ def example_segmentation_task(
 if __name__ == "__main__":
     from fractal_task_tools.task_wrapper import run_fractal_task
 
-    run_fractal_task(task_function=example_segmentation_task)
+    run_fractal_task(task_function={{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task)

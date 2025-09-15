@@ -2,7 +2,7 @@
   "manifest_version": "2",
   "task_list": [
     {
-      "name": "Example Segmentation Task",
+      "name": "{{ segmentation_task_name }}",
       "category": "Segmentation",
       "tags": [
         "Instance Segmentation",
@@ -10,7 +10,7 @@
       ],
       "docs_info": "### Purpose\n- Description of task functionality: Threshold an image and find connected components.\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
       "type": "parallel",
-      "executable_parallel": "example_segmentation_task.py",
+      "executable_parallel": "{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task.py",
       "meta_parallel": {
         "cpus_per_task": 1,
         "mem": 4000
