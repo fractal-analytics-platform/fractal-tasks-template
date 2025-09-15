@@ -4,4 +4,4 @@ package_name: my_project
 project_name: my-project
 project_short_description: Package description.
 project_url: ''
-
+mode: quick
