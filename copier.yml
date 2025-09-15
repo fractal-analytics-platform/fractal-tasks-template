@@ -4,7 +4,7 @@
 #   BSD 3-Clause License
 #   Copyright (c) 2021, Talley Lambert
 
-_subdirectory: project
+_subdirectory: template
 _skip_if_exists:
   - README.md
 
@@ -38,6 +38,51 @@ project_url:
 project_short_description:
   help: A short description of the package
   default: Package description.
+
+# Task-specific questions
+mode:
+  help: Choose between a quick setup (all examples tasks included) or a customized setup (choose which type of tasks to include)
+  type: str
+  default: quick
+  choices:
+    - quick
+    - customize
+
+include_segmentation_tasks:
+  when: "{{ mode == 'customize' }}"
+  help: Include segmentation tasks?
+  type: bool
+  default: true
+
+segmentation_task_name:
+  when: "{{ include_segmentation_tasks }}"
+  help: Name of the segmentation task
+  type: str
+  default: segmentation_task
+
+include_image_processing_tasks:
+  when: "{{ mode == 'customize' }}"
+  help: Include image processing tasks?
+  type: bool
+  default: true
+
+image_processing_task_name:
+  when: "{{ include_image_processing_tasks }}"
+  help: Name of the image processing task
+  type: str
+  default: image_processing_task
+
+include_feature_extraction_tasks:
+  when: "{{ mode == 'customize' }}"
+  help: Include feature extraction tasks?
+  type: bool
+  default: true
+
+feature_extraction_task_name:
+  when: "{{ include_feature_extraction_tasks }}"
+  help: Name of the feature extraction task
+  type: str
+  default: feature_extraction_task
 
 project_license:
   when: "{{ mode == 'customize' }}"

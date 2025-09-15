@@ -1,0 +1,158 @@
+"""This is the Python module for my_task."""
+
+import logging
+from typing import Optional
+
+import numpy as np
+from ngio import ChannelSelectionModel, open_ome_zarr_container
+from ngio.experimental.iterators import MaskedSegmentationIterator, SegmentationIterator
+from pydantic import validate_call
+from skimage.measure import label
+from skimage.morphology import ball, dilation, disk, opening, remove_small_objects
+
+from fractal_tasks_template.utils import IteratorConfiguration
+
+
+def segmentation_function(
+    int_img: np.ndarray, threshold: int, min_size: int = 50
+) -> np.ndarray:
+    """Example segmentation function.
+
+    This function will need to be adapted to the specific segmentation method.
+
+    Args:
+        int_img (np.ndarray): Input image to be processed
+        threshold (int): Threshold value for binarization
+        min_size (int): Minimum size of objects to keep
+
+    Returns:
+        label_img (np.ndarray): Labeled image
+    """
+    # Thresholding the images
+    binary_img = int_img >= threshold
+
+    # Removing small objects
+    cleaned_img = remove_small_objects(binary_img, min_size=min_size)
+    # Opening to separate touching objects
+    if cleaned_img.ndim == 2:
+        selem = disk(1)
+    else:
+        selem = ball(1)
+    opened_img = opening(cleaned_img, selem)
+
+    # Optional: Dilation to restore object size
+    dilated_img = dilation(opened_img, selem)
+
+    # Labeling the processed image
+    label_img = label(dilated_img, connectivity=1)
+    assert isinstance(label_img, np.ndarray)
+    return label_img.astype("uint32")
+
+
+@validate_call
+def example_segmentation_task(
+    *,
+    # Fractal managed parameters
+    zarr_url: str,
+    # Segmentation parameters
+    channel: ChannelSelectionModel,
+    label_name: Optional[str] = None,
+    threshold: int,
+    min_size: int = 50,
+    # Iteration parameters
+    iterator_configuration: Optional[IteratorConfiguration] = None,
+    overwrite: bool = True,
+) -> None:
+    """Threshold an image and find connected components.
+
+    Args:
+        zarr_url (str): URL to the OME-Zarr container
+        channel (ChannelSelectionModel): Select the input channel to be used for
+            segmentation.
+        label_name (Optional[str]): Name of the resulting label image. If not provided,
+            it will be set to "<channel_identifier>_thresholded".
+        threshold (int): Threshold value to be applied.
+        min_size (int): Minimum size of objects. Smaller objects are filtered out.
+        iterator_configuration (Optional[IteratorConfiguration]): Advanced
+            configuration to control masked and ROI-based iteration.
+        overwrite (bool): Whether to overwrite an existing label image.
+            Defaults to True.
+    """
+    # Use the first of input_paths
+    logging.info(f"{zarr_url=}")
+
+    # Open the OME-Zarr container
+    ome_zarr = open_ome_zarr_container(zarr_url)
+    logging.info(f"{ome_zarr=}")
+
+    if label_name is None:
+        label_name = f"{channel.identifier}_thresholded"
+    label = ome_zarr.derive_label(name=label_name, overwrite=overwrite)
+    logging.info(f"Output label image: {label=}")
+
+    if iterator_configuration is None:
+        iterator_configuration = IteratorConfiguration()
+
+    if iterator_configuration.masking is None:
+        # Base Iterator without masking
+        image = ome_zarr.get_image()
+        logging.info(f"{image=}")
+        iterator = SegmentationIterator(
+            input_image=image,
+            output_label=label,
+            channel_selection=0,  # channel,
+            axes_order="zyx",
+        )
+    else:
+        if iterator_configuration.masking.mode == "Table Name":
+            masking_table_name = iterator_configuration.masking.identifier
+            masking_label_name = None
+        else:
+            masking_label_name = iterator_configuration.masking.identifier
+            masking_table_name = None
+        logging.info(f"Using masking with {masking_table_name=}, {masking_label_name=}")
+
+        # Base Iterator with masking
+        masked_image = ome_zarr.get_masked_image(
+            masking_label_name=masking_label_name, masking_table_name=masking_table_name
+        )
+        logging.info(f"{masked_image=}")
+        iterator = MaskedSegmentationIterator(
+            input_image=masked_image,
+            output_label=label,
+            channel_selection=channel,
+            axes_order="zyx",
+        )
+    # Make sure that if we have a time axis, we iterate over it
+    # Strict=False means that if there no z axis or z is size 1, it will still work
+    # If your segmentation needs requires a volume, use strict=True
+    iterator = iterator.by_zyx(strict=False)
+    logging.info(f"Iterator created: {iterator=}")
+
+    if iterator_configuration.roi_table is not None:
+        table = ome_zarr.get_generic_roi_table(name=iterator_configuration.roi_table)
+        logging.info(f"ROI table retrieved: {table=}")
+        iterator = iterator.product(table)
+        logging.info(f"Iterator updated with ROI table: {iterator=}")
+
+    # Process each image in the iterator
+    max_label = 0
+    logging.info("Starting processing...")
+    for image_data, writer in iterator.iter_as_numpy():
+        label_img = segmentation_function(
+            int_img=image_data, threshold=threshold, min_size=min_size
+        )
+
+        label_img = label_img + max_label
+        label_img = np.where(label_img > 0, label_img, 0)
+        print(label_img.shape)
+        writer(label_img)
+        max_label = label_img.max()
+
+    logging.info(f"label {label_name} successfully created at {zarr_url}")
+
+
+if __name__ == "__main__":
+    from fractal_task_tools.task_wrapper import run_fractal_task
+
+    run_fractal_task(task_function=example_segmentation_task)
