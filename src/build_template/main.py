@@ -14,6 +14,7 @@ Usage:
 
 import argparse
 import shutil
+import subprocess
 import sys
 from collections.abc import Generator
 from itertools import product
@@ -272,10 +273,8 @@ def main(args: argparse.Namespace) -> int:
             replace_in_file(path, "# --- #", "")
     print_log("Build complete.")
 
-    if args.validate:
+    if args.check:
         # Use git diff to check if the template hasn't changed
-        import subprocess
-
         result = subprocess.run(
             ["git", "diff", "--exit-code", str(template_dir)],
             capture_output=True,
