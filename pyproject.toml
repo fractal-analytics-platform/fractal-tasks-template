@@ -105,6 +105,7 @@ test = { cmd = ["pytest", "./tests/"] }
 
 build-template = { cmd = ["bash", "./build_template.sh"] }
 
+# Test change
 
 all-tasks = [
     { task = "create-manifest", environment = "dev" },

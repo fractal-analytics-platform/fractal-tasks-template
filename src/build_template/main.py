@@ -17,6 +17,7 @@ import sys
 from collections.abc import Generator
 from itertools import product
 from pathlib import Path
+import argparse
 
 # ---- Constants and variables (safe zone from bash) ----
 
@@ -107,6 +108,18 @@ exclusion_patterns = [
 # ---- Helpers ----
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Build the template directory.")
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate the template using copier.",
+        default=False,
+    )
+    return parser.parse_args()
+
+
 def print_log(msg: str) -> None:
     """Log a message to stdout with a prefix."""
     print(f"[build_template.py] {msg}")
@@ -177,7 +190,7 @@ def move_path(old: Path, new: Path) -> None:
 # ---- Main workflow ----
 
 
-def main() -> int:
+def main(args: argparse.Namespace) -> int:
     """Main function to build the template directory."""
     # Step 1: Clean up current template dir
     print_log("Cleaning up template directory.")
@@ -257,9 +270,25 @@ def main() -> int:
     for path in path_generator(template_dir):
         if path.is_file():
             replace_in_file(path, "# --- #", "")
-    print_log("Done.")
+    print_log("Build complete.")
+
+    if args.validate:
+        # Use git diff to check if the template hasn't changed
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "diff", "--exit-code", str(template_dir)],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print_log("Validation failed: template directory has changed.")
+            print(result.stdout)
+            return 1
+        print_log("Validation succeeded: template directory is up to date.")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    args = parse_args()
+    sys.exit(main(args))
