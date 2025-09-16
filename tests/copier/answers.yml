@@ -12,3 +12,4 @@ image_processing_task_name: image_processing_task
 include_feature_extraction_tasks: true
 feature_extraction_task_name: feature_extraction_task
 project_license: BSD-3-Clause
+run_pixi_test: false

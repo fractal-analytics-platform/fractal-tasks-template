@@ -146,7 +146,7 @@ run_git_initialization:
   type: bool
   default: true
 
-run_pixi_test:
+run_pixi_init_task:
   help: >
     Run pixi init task? (Requires `pixi` to be installed)
     This will set up pre-commit hooks, run tests, and format the code.
@@ -160,5 +160,5 @@ _tasks:
     when: "{{ run_git_initialization }}"
   - command: git commit -m 'Initial commit from copier template'
     when: "{{ run_git_initialization }}"
-  - command: pixi run all-tasks
-    when: "{{ run_pixi_test }}"
+  - command: pixi run init-tasks
+    when: "{{ run_pixi_init_task }}"

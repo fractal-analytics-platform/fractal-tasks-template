@@ -103,7 +103,7 @@ create-manifest = { cmd = [
 
 test = { cmd = ["pytest", "./tests/"] }
 
-all-tasks = [
+init-tasks = [
     { task = "install-pre-commit", environment = "dev" },
     { task = "format-code", environment = "dev" },
     { task = "format-imports", environment = "dev" },
