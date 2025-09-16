@@ -12,12 +12,12 @@ Usage:
     python build_template.py
 """
 
+import argparse
 import shutil
 import sys
 from collections.abc import Generator
 from itertools import product
 from pathlib import Path
-import argparse
 
 # ---- Constants and variables (safe zone from bash) ----
 
@@ -112,9 +112,9 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Build the template directory.")
     parser.add_argument(
-        "--validate",
+        "--check",
         action="store_true",
-        help="Validate the template using copier.",
+        help="Check if the template is up to date (git diff)",
         default=False,
     )
     return parser.parse_args()
@@ -282,10 +282,9 @@ def main(args: argparse.Namespace) -> int:
             text=True,
         )
         if result.returncode != 0:
-            print_log("Validation failed: template directory has changed.")
-            print(result.stdout)
+            print_log("Check failed: template directory has changed.")
             return 1
-        print_log("Validation succeeded: template directory is up to date.")
+        print_log("Check succeeded: template directory is up to date.")
     return 0
 
 
