@@ -66,31 +66,31 @@ keyword_map = [
 # if certain conditions are met (e.g. include_segmentation_task is true)
 conditional_patterns = [
     (
-        "{{ segmentation_module }}",
+        "{{ segmentation_module }}.pi",
         "{% if include_segmentation_task %}{{ segmentation_module }}.py{% endif %}",
     ),
     (
-        "{{ segmentation_module }}",
+        "{{ segmentation_module }}.md",
         "{% if include_segmentation_task %}{{ segmentation_module }}.md{% endif %}",
     ),
     (
-        "{{ image_processing_module }}",
+        "{{ image_processing_module }}.py",
         "{% if include_image_processing_task %}"
         "{{ image_processing_module }}.py"
         "{% endif %}",
     ),
     (
-        "{{ image_processing_module }}",
+        "{{ image_processing_module }}.md",
         "{% if include_image_processing_task %}"
         "{{ image_processing_module }}.md"
         "{% endif %}",
     ),
     (
-        "{{ feature_module }}",
+        "{{ feature_module }}.py",
         "{% if include_feature_task %}{{ feature_module }}.py{% endif %}",
     ),
     (
-        "{{ feature_module }}",
+        "{{ feature_module }}.md",
         "{% if include_feature_task %}{{ feature_module }}.md{% endif %}",
     ),
 ]

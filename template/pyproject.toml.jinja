@@ -90,7 +90,7 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 
 [tool.pixi.tasks]
-
+install-pre-commit = { cmd = ["pre-commit", "install"] }
 format-imports = { cmd = ["ruff", "check", "--select", "I", "--fix"] }
 format-code = { cmd = ["ruff", "format", "."] }
 
@@ -103,13 +103,10 @@ create-manifest = { cmd = [
 
 test = { cmd = ["pytest", "./tests/"] }
 
-build-template = { cmd = ["python", "src/build_template/main.py"] }
-check-template = { cmd = ["python", "src/build_template/main.py", "--check"] }
-
 all-tasks = [
-    { task = "create-manifest", environment = "dev" },
+    { task = "install-pre-commit", environment = "dev" },
     { task = "format-code", environment = "dev" },
     { task = "format-imports", environment = "dev" },
+    { task = "create-manifest", environment = "dev" },
     { task = "test", environment = "dev" },
-    { task = "build-template", environment = "dev" },
 ]

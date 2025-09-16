@@ -140,3 +140,25 @@ project_license:
     Apache-2.0: Apache-2.0
     GNU GPLv3: GPL-3.0
     none: none
+
+run_git_initialization:
+  help: Initialize a git repository in the generated project? (Requires `git` to be installed)
+  type: bool
+  default: true
+
+run_pixi_test:
+  help: >
+    Run pixi init task? (Requires `pixi` to be installed)
+    This will set up pre-commit hooks, run tests, and format the code.
+  type: bool
+  default: true
+
+_tasks:
+  - command: git init
+    when: "{{ run_git_initialization }}"
+  - command: git add .
+    when: "{{ run_git_initialization }}"
+  - command: git commit -m 'Initial commit from copier template'
+    when: "{{ run_git_initialization }}"
+  - command: pixi run all-tasks
+    when: "{{ run_pixi_test }}"
