@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from ngio import ChannelSelectionModel, create_synthetic_ome_zarr
 
-from {{ package_name }}.{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task import (
-    {{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task,
+from {{ package_name }}.{{ segmentation_module }} import (
+    {{ segmentation_module }},
 )
 from {{ package_name }}.utils import (
     IteratorConfiguration,
@@ -26,7 +26,7 @@ from {{ package_name }}.utils import (
         ((1, 1, 10, 64, 64), "tczyx"),
     ],
 )
-def test_{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
+def test_{{ segmentation_module }}(tmp_path: Path, shape: tuple[int, ...], axes: str):
     test_data_path = tmp_path / "data.zarr"
 
     if "c" in axes:
@@ -43,7 +43,7 @@ def test_{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_
         axes_names=axes,
     )
     channel = ChannelSelectionModel(identifier="DAPI_0", mode="label")
-    {{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task(
+    {{ segmentation_module }}(
         zarr_url=str(test_data_path), threshold=18252, channel=channel, overwrite=False
     )
 
@@ -62,7 +62,7 @@ def test_{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_
         ((1, 1, 10, 64, 64), "tczyx"),
     ],
 )
-def test_{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task_masked(
+def test_{{ segmentation_module }}_masked(
     tmp_path: Path, shape: tuple[int, ...], axes: str
 ):
     test_data_path = tmp_path / "data.zarr"
@@ -86,7 +86,7 @@ def test_{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_
         masking=MaskingConfiguration(mode="Label Name", identifier="nuclei_mask"),
         roi_table=None,
     )
-    {{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task(
+    {{ segmentation_module }}(
         zarr_url=str(test_data_path),
         threshold=18252,
         channel=channel,

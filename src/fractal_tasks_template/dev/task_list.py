@@ -21,6 +21,7 @@ INPUT_MODELS = [
 ]
 
 TASK_LIST = [
+    # --- #{% if include_segmentation_tasks %}
     ParallelTask(
         name="Example Segmentation Task",
         executable="example_segmentation_task.py",
@@ -29,4 +30,5 @@ TASK_LIST = [
         tags=["Instance Segmentation", "Classical segmentation"],
         docs_info="file:docs_info/example_segmentation_task.md",
     ),
+    # --- #{% endif %}
 ]

@@ -1,0 +1,249 @@
+"""This script builds the template directory for the fractal-tasks-template project.
+
+Replicates the original bash script's behavior:
+1) Clean & seed the template directory with static template files
+2) Copy selected project files/dirs into template/
+3) Convert selected files to .jinja
+4) Apply string replacements inside those files
+5) Rename files/dirs to include jinja placeholders
+6) Cleanup backup files
+
+Usage:
+    python build_template.py
+"""
+
+import shutil
+import sys
+from collections.abc import Generator
+from itertools import product
+from pathlib import Path
+
+# ---- Constants and variables (safe zone from bash) ----
+
+template_dir = Path("template")
+static_template_dir = Path("static_template")
+source_dir = Path(".")
+
+to_be_included = [
+    "src",
+    "tests",
+    "pyproject.toml",
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    ".github",
+]
+
+to_be_excluded = [
+    Path("src") / "build_template",
+    Path("tests") / "copier",
+    Path(".github") / "workflows" / "copier_ci.yml",
+    Path(".github") / "workflows" / "github_release.yaml",
+    Path(".github") / "workflows" / "github_release.yml",
+]
+
+# Mapping of search -> replace (ordered, like the bash KEYWORD_MAP)
+keyword_map = [
+    ("Fractal Task Author", "{{ author_name }}"),
+    ("task_author@example.com", "{{ author_email }}"),
+    ("fractal-tasks-template", "{{ project_name }}"),
+    ("fractal_tasks_template", "{{ package_name }}"),
+    ("task_author@example.com", "{{ project_url }}"),
+    (
+        "Collection of example tasks for the Fractal framework",
+        "{{ project_short_description }}",
+    ),
+    ("{{ matrix.python-version }}", "{{ '{{' }}  matrix.python-version {{ '{{' }} }}"),
+    ("{{ matrix.os }}", "{{ '{{' }}  matrix.os {{ '{{' }} }}"),
+    ("Example Segmentation Task", "{{ segmentation_task }}"),
+    ("example_segmentation_task", "{{ segmentation_module }}"),
+]
+
+# Conditional files to exclude from the template
+
+# Files that include jinja placeholders that should only be present
+# if certain conditions are met (e.g. include_segmentation_task is true)
+conditional_patterns = [
+    (
+        "{{ segmentation_module }}",
+        "{% if include_segmentation_task %}test.py{% endif %}",
+    ),
+    (
+        "{{ image_processing_module }}",
+        "{% if include_image_processing_task %}{{ image_processing_module }}.py{% endif %}",
+    ),
+    (
+        "{{ feature_module }}",
+        "{% if include_feature_task %}{{ feature_module }}.py{% endif %}",
+    ),
+]
+
+# Static template files copied verbatim from SOURCE_DIR/template/
+tmp_dir = Path("_tmp")
+exclusion_patterns = [
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    "__pycache__",
+    ".DS_Store",
+    ".ipynb_checkpoints",
+]
+
+# ---- Helpers ----
+
+
+def print_log(msg: str) -> None:
+    """Log a message to stdout with a prefix."""
+    print(f"[build_template.py] {msg}")
+
+
+def path_generator(root: Path) -> Generator[Path, None, None]:
+    """Generate all files and directories under root, excluding certain patterns."""
+    for path in root.rglob("*"):
+        if any(path.match(pattern) for pattern in exclusion_patterns):
+            continue
+        yield path
+
+
+def copy_any(src: Path, dst_dir: Path) -> None:
+    """Copy a file or directory into dst_dir, preserving metadata."""
+    if not src.exists():
+        print_log(f"WARNING: {src} does not exist; skipping.")
+        return
+    dst = dst_dir / src.name
+    if src.is_dir():
+        if dst.exists():
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst, dirs_exist_ok=False)
+    else:
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+
+
+def ensure_removed(path: Path) -> None:
+    """Remove a file or directory if it exists."""
+    if path.is_dir():
+        shutil.rmtree(path, ignore_errors=True)
+    elif path.exists():
+        path.unlink(missing_ok=True)
+
+
+def replace_in_file(path: Path, search: str, replace: str) -> bool:
+    """Replace all occurrences of 'search' with 'replace' in the file at 'path'."""
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+    text = path.read_text(encoding="utf-8")
+    if search in text:
+        print_log(f"Replacing '{search}' with '{replace}' in {path}")
+        new_text = text.replace(search, replace)
+        path.write_text(new_text, encoding="utf-8")
+        return True
+    return False
+
+
+def move_path(old: Path, new: Path) -> None:
+    """Rename a file or directory from 'old' to 'new'."""
+    if not old.exists():
+        print_log(
+            f"WARNING: Cannot rename '{old}' -> '{new}' "
+            "because source is missing; skipping."
+        )
+        return
+    new.parent.mkdir(parents=True, exist_ok=True)
+    # If new exists and is a dir, remove it before move to mimic mv behavior used here
+    if new.exists():
+        if new.is_dir():
+            shutil.rmtree(new)
+        else:
+            new.unlink()
+    shutil.move(str(old), str(new))
+
+
+# ---- Main workflow ----
+
+
+def main() -> int:
+    """Main function to build the template directory."""
+    # Step 1: Clean up current template dir
+    print_log("Cleaning up template directory.")
+    if template_dir.exists():
+        shutil.rmtree(template_dir)
+    template_dir.mkdir(parents=True, exist_ok=True)
+
+    # Step 2: Copy relevant files from SOURCE_DIR to TEMPLATE_DIR
+    print_log(f"Copying relevant files from {source_dir} to {template_dir}")
+    for item in to_be_included:
+        print_log(f"Copying {item} to {template_dir}")
+        static_file = source_dir / item
+        copy_any(static_file, template_dir)
+
+    for item in to_be_excluded:
+        print_log(f"Removing {item} from {template_dir}")
+        static_file = template_dir / item
+        ensure_removed(static_file)
+
+    # Step 4: Replace keywords in files
+    path_changed = []
+    for search, replace in keyword_map:
+        for static_file in path_generator(template_dir):
+            if static_file.is_file() and replace_in_file(static_file, search, replace):
+                path_changed.append(static_file)
+
+    # Step 5: Rename files and directories to include jinja placeholders
+    for static_file in path_changed:
+        # Change extension to .jinja if it is not already a .jinja file
+        if not static_file.suffix == ".jinja":
+            new_file = static_file.with_suffix(static_file.suffix + ".jinja")
+            move_path(static_file, new_file)
+            print_log(f"Renamed {static_file} -> {new_file}")
+
+    while True:
+        # Repeat until no more renames are done
+        pairs = product(path_generator(template_dir), keyword_map)
+        for static_file, (search, replace) in pairs:
+            if search in static_file.name:
+                new_name = static_file.name.replace(search, replace)
+                new_path = static_file.parent / new_name
+                move_path(static_file, new_path)
+                print_log(f"Renamed {static_file} -> {new_path}")
+                break
+        else:
+            break
+
+    # Step 6: Remove conditional files if conditions are not met
+    for search, condition in conditional_patterns:
+        for static_file in path_generator(template_dir):
+            if search in static_file.name:
+                new_name = static_file.name.replace(search, condition)
+                new_path = static_file.parent / new_name
+                move_path(static_file, new_path)
+                print_log(f"Renamed {static_file} -> {new_path}")
+
+    # Move static template files
+    current_files = set(path_generator(template_dir))
+    for static_file in path_generator(static_template_dir):
+        if static_file.is_dir():
+            raise NotImplementedError(
+                "Directory structures in static_template_dir are not supported."
+            )
+
+        for file in current_files:
+            if file.name == static_file.name:
+                print_log(f"Replacing existing file {file} with static template file.")
+                destination = file.parent
+                file.unlink()
+                break
+        else:
+            destination = template_dir
+            print_log(f"Copying new static template file {static_file}.")
+        copy_any(static_file, destination)
+
+    # Final cleanup removing any #---# special markers left in files
+    for path in path_generator(template_dir):
+        if path.is_file():
+            replace_in_file(path, "# --- #", "")
+    print_log("Done.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

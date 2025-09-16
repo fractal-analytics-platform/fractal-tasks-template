@@ -27,7 +27,7 @@ project_name:
 
 package_name:
   help: Name of your top-level Python package (the one appearing in Python `import` statements)
-  default: "{{ project_name.lower().replace(' ', '_').replace('-', '_') }}"
+  default: "{{ project_name | lower | replace(' ', '_') | replace('-', '_') }}"
   validator: "{% if not package_name.isidentifier() %}Invalid package name{% endif %}"
 
 project_url:
@@ -48,41 +48,86 @@ mode:
     - quick
     - customize
 
+# Segmentation task configuration
 include_segmentation_tasks:
   when: "{{ mode == 'customize' }}"
-  help: Include segmentation tasks?
+  help: Include an example segmentation task?
   type: bool
   default: true
 
-segmentation_task_name:
-  when: "{{ include_segmentation_tasks }}"
-  help: Name of the segmentation task
+segmentation_task:
+  when: "{{ mode == 'customize' and include_segmentation_tasks }}"
+  help: >
+    Name of the segmentation task (e.g., Threshold Segmentation). 
+    This is how the task will be listed in the Fractal web interface.
   type: str
-  default: segmentation_task
+  default: Example Segmentation
+  validator: >-
+    {% if not (segmentation_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
+    segmentation_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
+    {% endif %}
+    {% if segmentation_task | trim != segmentation_task %}
+    segmentation_task must not have leading or trailing spaces.
+    {% endif %}
 
-include_image_processing_tasks:
+segmentation_module:
+  when: false
+  default: "{{ segmentation_task | lower | replace('-', '_') | replace(' ', '_') }}_task"
+  validator: "{% if not segmentation_module.isidentifier() %}Invalid segmentation module name{% endif %}"
+
+# Image processing task configuration
+include_image_processing_task:
   when: "{{ mode == 'customize' }}"
-  help: Include image processing tasks?
+  help: Include an example image processing task?
   type: bool
   default: true
 
-image_processing_task_name:
-  when: "{{ include_image_processing_tasks }}"
-  help: Name of the image processing task
+image_processing_task:
+  when: "{{ mode == 'customize' and include_image_processing_task }}"
+  help: >
+    Name of the image processing task (e.g., Gaussian Blur). 
+    This is how the task will be listed in the Fractal web interface.
   type: str
-  default: image_processing_task
+  default: Example Image Processing
+  validator: >-
+    {% if not (image_processing_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
+    image_processing_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
+    {% endif %}
+    {% if image_processing_task | trim != image_processing_task %}
+    image_processing_task must not have leading or trailing spaces.
+    {% endif %}
 
-include_feature_extraction_tasks:
+image_processing_module:
+  when: false
+  default: "{{ image_processing_task | lower | replace('-', '_') | replace(' ', '_') }}_task"
+  validator: "{% if not image_processing_module.isidentifier() %}Invalid image processing module name{% endif %}"
+
+# Feature extraction task configuration
+include_feature_task:
   when: "{{ mode == 'customize' }}"
-  help: Include feature extraction tasks?
+  help: Include an example feature extraction task?
   type: bool
   default: true
 
-feature_extraction_task_name:
-  when: "{{ include_feature_extraction_tasks }}"
-  help: Name of the feature extraction task
+feature_task:
+  when: "{{ mode == 'customize' and include_feature_task }}"
+  help: >
+    Name of the feature extraction task (e.g., Region Props Features). 
+    This is how the task will be listed in the Fractal web interface.
   type: str
-  default: feature_extraction_task
+  default: Example Feature Extraction
+  validator: >-
+    {% if not (feature_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
+    feature_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
+    {% endif %}
+    {% if feature_task | trim != feature_task %}
+    feature_task must not have leading or trailing spaces.
+    {% endif %}
+
+feature_module:
+  when: false
+  default: "{{ feature_task | lower | replace('-', '_') | replace(' ', '_') }}_task"
+  validator: "{% if not feature_module.isidentifier() %}Invalid feature module name{% endif %}"
 
 project_license:
   when: "{{ mode == 'customize' }}"

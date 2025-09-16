@@ -21,12 +21,14 @@ INPUT_MODELS = [
 ]
 
 TASK_LIST = [
+    {% if include_segmentation_tasks %}
     ParallelTask(
-        name="{{ segmentation_task_name }}",
-        executable="{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task.py",
+        name="{{ segmentation_task }}",
+        executable="{{ segmentation_module }}.py",
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Segmentation",
         tags=["Instance Segmentation", "Classical segmentation"],
-        docs_info="file:docs_info/{{ segmentation_task_name | lower | replace('-', '_') | replace(' ', '_') }}_task.md",
+        docs_info="file:docs_info/{{ segmentation_module }}.md",
     ),
+    {% endif %}
 ]
