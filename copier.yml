@@ -49,7 +49,7 @@ mode:
     - customize
 
 # Segmentation task configuration
-include_segmentation_tasks:
+include_segmentation_task:
   when: "{{ mode == 'customize' }}"
   help: Include an example segmentation task?
   type: bool
