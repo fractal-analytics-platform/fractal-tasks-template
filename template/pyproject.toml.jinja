@@ -103,8 +103,8 @@ create-manifest = { cmd = [
 
 test = { cmd = ["pytest", "./tests/"] }
 
-build-template = { cmd = ["bash", "./build_template.sh"] }
-
+build-template = { cmd = ["python", "src/build_template/main.py"] }
+check-template = { cmd = ["python", "src/build_template/main.py", "--check"] }
 
 all-tasks = [
     { task = "create-manifest", environment = "dev" },
