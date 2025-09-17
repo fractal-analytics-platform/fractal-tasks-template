@@ -18,13 +18,24 @@ pipx install copier
 Then run `copier`, passing in the template url and the desired
 output directory (usually the name of your new package):
 ```console
-copier copy gh:fractal-analytics-platform/fractal-tasks-template your-package-name
+copier copy gh:fractal-analytics-platform/fractal-tasks-template your-package-name --trust
 ```
+
 As part of this procedure, `copier` will ask you a set of questions; answers
 are used to customize the template to fit your needs (e.g. by setting
 appropriate file/folder names).
 
-### 2. Initialize `git`/GitLab/GitHub repository (first-time only)
+The `--trust` flag is needed to run the post-copy script that initializes
+the package structure.
+
+The post-copy script will:
+1. Initialize a git repository (requires git).
+2. Use `pixi` to create a Python environment (requires `pixi`), and subsequently run some formatting a pytest
+   to make sure everything is working.
+
+The script can be safely skipped by answering "no" when asked by `copier`.
+
+### Alternative to post-install: Initialize `git`/GitLab/GitHub repository
 
 After creating the repository, you need to initialize a `git` repository.
 This step is required because in this template, we use git tags to manage the versioning of the package.

@@ -160,5 +160,7 @@ _tasks:
     when: "{{ run_git_init }}"
   - command: git commit -m 'Initial commit from copier template'
     when: "{{ run_git_init }}"
+  - command: git tag -a 0.1.0 -m 'Initial tag from copier template'
+    when: "{{ run_git_init }}"
   - command: pixi run init-tasks
     when: "{{ run_pixi_init_task }}"
