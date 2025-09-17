@@ -1,3 +1,5 @@
+"""Tests for valid task interface."""
+
 import json
 
 import requests
@@ -7,7 +9,8 @@ from . import MANIFEST
 
 
 def test_valid_manifest(tmp_path):
-    """
+    """Test if the manifest is valid according to the JSON schema.
+
     NOTE: to avoid adding a fractal-server dependency, we simply download the
     relevant file.
     """

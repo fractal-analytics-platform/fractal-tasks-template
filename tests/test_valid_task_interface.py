@@ -1,3 +1,5 @@
+"""Tests for valid task interface."""
+
 import json
 import subprocess
 from shlex import split as shlex_split
@@ -37,8 +39,9 @@ def validate_command(cmd: str):
 
 @pytest.mark.parametrize("task", MANIFEST["task_list"])
 def test_task_interface(task, tmp_path):
-    """
-    Test that running tasks from the command line with invalid arguments leads
+    """Check that the task interface is valid.
+
+    This test runs the task from the command line with invalid arguments leads
     to the expected behavior.
     """
     tmp_file_args = str(tmp_path / "args.json")
