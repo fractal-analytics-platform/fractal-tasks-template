@@ -22,5 +22,8 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Testing if template matches the codebases
+        run: python src/build_template/main.py --check
+
       - name: copy-install-test-build
         run: ./tests/copier/copy-install-test-build.sh
