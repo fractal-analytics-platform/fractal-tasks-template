@@ -1,6 +1,7 @@
 """This is the Python module for my_task."""
 
 import logging
+from typing import Optional
 
 import numpy as np
 from ngio import ChannelSelectionModel, open_ome_zarr_container
@@ -55,11 +56,11 @@ def threshold_segmentation_task(
     zarr_url: str,
     # Segmentation parameters
     channel: ChannelSelectionModel,
-    label_name: str | None = None,
+    label_name: Optional[str] = None,
     threshold: int,
     min_size: int = 50,
     # Iteration parameters
-    iterator_configuration: IteratorConfiguration | None = None,
+    iterator_configuration: Optional[IteratorConfiguration] = None,
     overwrite: bool = True,
 ) -> None:
     """Threshold an image and find connected components.
