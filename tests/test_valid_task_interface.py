@@ -11,9 +11,7 @@ from . import MANIFEST, PACKAGE_DIR
 
 
 def validate_command(cmd: str):
-    """
-    Run a command and make assertions on stdout, stderr, retcode.
-    """
+    """Run a command and make assertions on stdout, stderr, retcode."""
     debug(cmd)
     result = subprocess.run(  # nosec
         shlex_split(cmd),
