@@ -20,12 +20,15 @@ from collections.abc import Generator
 from itertools import product
 from pathlib import Path
 
-# ---- Constants and variables (safe zone from bash) ----
+import yaml
 
-template_dir = Path("template")
-static_template_dir = Path("static_template")
-source_dir = Path(".")
+# ---- Constants and variables (safe zone to edit) ----
 
+source_dir = Path(".")  # Directory containing the source files to build the template
+template_dir = Path("template")  # Directory where the template will be built
+static_template_dir = Path("static_template")  # Directory with static files to copy
+
+# These files and directories will be copied from SOURCE_DIR to TEMPLATE_DIR
 to_be_included = [
     "src",
     "tests",
@@ -35,6 +38,7 @@ to_be_included = [
     ".github",
 ]
 
+# These files and directories will be removed from TEMPLATE_DIR after copying
 to_be_excluded = [
     Path("src") / "build_template",
     Path("tests") / "copier",
@@ -43,61 +47,10 @@ to_be_excluded = [
     Path(".github") / "workflows" / "github_release.yml",
 ]
 
-# Mapping of search -> replace (ordered, like the bash KEYWORD_MAP)
-keyword_map = [
-    ("Fractal Task Author", "{{ author_name }}"),
-    ("task_author@example.com", "{{ author_email }}"),
-    ("fractal-tasks-template", "{{ project_name }}"),
-    ("fractal_tasks_template", "{{ package_name }}"),
-    ("task_author@example.com", "{{ project_url }}"),
-    (
-        "Collection of example tasks for the Fractal framework",
-        "{{ project_short_description }}",
-    ),
-    ("{{ matrix.python-version }}", "{{ '{{' }}  matrix.python-version {{ '{{' }} }}"),
-    ("{{ matrix.os }}", "{{ '{{' }}  matrix.os {{ '{{' }} }}"),
-    ("Example Segmentation Task", "{{ segmentation_task }}"),
-    ("example_segmentation_task", "{{ segmentation_module }}"),
-]
+# End of editable zone
 
-# Conditional files to exclude from the template
-
-# Files that include jinja placeholders that should only be present
-# if certain conditions are met (e.g. include_segmentation_task is true)
-conditional_patterns = [
-    (
-        "{{ segmentation_module }}.pi",
-        "{% if include_segmentation_task %}{{ segmentation_module }}.py{% endif %}",
-    ),
-    (
-        "{{ segmentation_module }}.md",
-        "{% if include_segmentation_task %}{{ segmentation_module }}.md{% endif %}",
-    ),
-    (
-        "{{ image_processing_module }}.py",
-        "{% if include_image_processing_task %}"
-        "{{ image_processing_module }}.py"
-        "{% endif %}",
-    ),
-    (
-        "{{ image_processing_module }}.md",
-        "{% if include_image_processing_task %}"
-        "{{ image_processing_module }}.md"
-        "{% endif %}",
-    ),
-    (
-        "{{ feature_module }}.py",
-        "{% if include_feature_task %}{{ feature_module }}.py{% endif %}",
-    ),
-    (
-        "{{ feature_module }}.md",
-        "{% if include_feature_task %}{{ feature_module }}.md{% endif %}",
-    ),
-]
-
-# Static template files copied verbatim from SOURCE_DIR/template/
-tmp_dir = Path("_tmp")
-exclusion_patterns = [
+# Patterns to exclude when listing files
+_exclusion_patterns = [
     "*.pyc",
     "*.pyo",
     "*.pyd",
@@ -106,12 +59,27 @@ exclusion_patterns = [
     ".ipynb_checkpoints",
 ]
 
+# Additional mappings that are not in keywords_map.yml
+_fix_mappings = {
+    "{{ '{{' }}  matrix.python-version {{ '{{' }} }}": "{{ matrix.python-version }}",
+    "{{ '{{' }}  matrix.os {{ '{{' }} }}": "{{ matrix.os }}",
+    "": "# --- #",  # Special marker to uncomment lines
+}
+
 # ---- Helpers ----
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Build the template directory.")
+
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="Path to the YAML configuration file for keyword mappings",
+        default=Path("keywords_map.yml"),
+    )
+
     parser.add_argument(
         "--check",
         action="store_true",
@@ -129,7 +97,7 @@ def print_log(msg: str) -> None:
 def path_generator(root: Path) -> Generator[Path, None, None]:
     """Generate all files and directories under root, excluding certain patterns."""
     for path in root.rglob("*"):
-        if any(path.match(pattern) for pattern in exclusion_patterns):
+        if any(path.match(pattern) for pattern in _exclusion_patterns):
             continue
         yield path
 
@@ -193,6 +161,16 @@ def move_path(old: Path, new: Path) -> None:
 
 def main(args: argparse.Namespace) -> int:
     """Main function to build the template directory."""
+    # Load keyword mappings from YAML file
+    if not args.config.exists():
+        raise FileNotFoundError(f"Configuration file not found: {args.config}")
+
+    with args.config.open("r", encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+
+    keyword_map: dict[str, str] = config["keyword_map"]
+
+    conditional_patterns: dict[str, str] = config["conditional_patterns"]
     # Step 1: Clean up current template dir
     print_log("Cleaning up template directory.")
     if template_dir.exists():
@@ -213,24 +191,32 @@ def main(args: argparse.Namespace) -> int:
 
     # Step 4: Replace keywords in files
     path_changed = []
-    for search, replace in keyword_map:
+    for key, search in keyword_map.items():
+        for static_file in path_generator(template_dir):
+            replace = "{{ " + key + " }}"
+            if static_file.is_file() and replace_in_file(static_file, search, replace):
+                path_changed.append(static_file)
+
+    for replace, search in _fix_mappings.items():
         for static_file in path_generator(template_dir):
             if static_file.is_file() and replace_in_file(static_file, search, replace):
                 path_changed.append(static_file)
 
     # Step 5: Rename files and directories to include jinja placeholders
-    for static_file in path_changed:
+    for static_file in set(path_changed):
         # Change extension to .jinja if it is not already a .jinja file
         if not static_file.suffix == ".jinja":
             new_file = static_file.with_suffix(static_file.suffix + ".jinja")
             move_path(static_file, new_file)
-            print_log(f"Renamed {static_file} -> {new_file}")
+            print_log(f"Jinjified {static_file} -> {new_file}")
 
     while True:
         # Repeat until no more renames are done
-        pairs = product(path_generator(template_dir), keyword_map)
-        for static_file, (search, replace) in pairs:
+        pairs = product(path_generator(template_dir), keyword_map.items())
+        for static_file, (key, search) in pairs:
             if search in static_file.name:
+                print(f"Found {search} in {static_file.name}")
+                replace = "{{ " + key + " }}"
                 new_name = static_file.name.replace(search, replace)
                 new_path = static_file.parent / new_name
                 move_path(static_file, new_path)
@@ -240,10 +226,13 @@ def main(args: argparse.Namespace) -> int:
             break
 
     # Step 6: Remove conditional files if conditions are not met
-    for search, condition in conditional_patterns:
+    for search, condition in conditional_patterns.items():
         for static_file in path_generator(template_dir):
             if search in static_file.name:
-                new_name = static_file.name.replace(search, condition)
+                new_stem = (
+                    "{% if " + condition + " %}" + static_file.stem + "{% endif %}"
+                )
+                new_name = new_stem + ".jinja"
                 new_path = static_file.parent / new_name
                 move_path(static_file, new_path)
                 print_log(f"Renamed {static_file} -> {new_path}")
@@ -268,9 +257,6 @@ def main(args: argparse.Namespace) -> int:
         copy_any(static_file, destination)
 
     # Final cleanup removing any #---# special markers left in files
-    for path in path_generator(template_dir):
-        if path.is_file():
-            replace_in_file(path, "# --- #", "")
     print_log("Build complete.")
 
     if args.check:

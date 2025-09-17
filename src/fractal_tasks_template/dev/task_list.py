@@ -23,12 +23,12 @@ INPUT_MODELS = [
 TASK_LIST = [
     # --- #{% if include_segmentation_tasks %}
     ParallelTask(
-        name="Example Segmentation Task",
-        executable="example_segmentation_task.py",
+        name="Threshold Segmentation",
+        executable="threshold_segmentation_task.py",
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Segmentation",
         tags=["Instance Segmentation", "Classical segmentation"],
-        docs_info="file:docs_info/example_segmentation_task.md",
+        docs_info="file:docs_info/threshold_segmentation_task.md",
     ),
     # --- #{% endif %}
 ]

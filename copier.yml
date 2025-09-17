@@ -61,7 +61,7 @@ segmentation_task:
     Name of the segmentation task (e.g., Threshold Segmentation). 
     This is how the task will be listed in the Fractal web interface.
   type: str
-  default: Example Segmentation
+  default: Threshold Segmentation
   validator: >-
     {% if not (segmentation_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
     segmentation_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
@@ -88,7 +88,7 @@ image_processing_task:
     Name of the image processing task (e.g., Gaussian Blur). 
     This is how the task will be listed in the Fractal web interface.
   type: str
-  default: Example Image Processing
+  default: Gaussian Blur
   validator: >-
     {% if not (image_processing_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
     image_processing_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
@@ -115,7 +115,7 @@ feature_task:
     Name of the feature extraction task (e.g., Region Props Features). 
     This is how the task will be listed in the Fractal web interface.
   type: str
-  default: Example Feature Extraction
+  default: Region Props Features
   validator: >-
     {% if not (feature_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
     feature_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.

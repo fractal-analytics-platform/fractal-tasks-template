@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from ngio import ChannelSelectionModel, create_synthetic_ome_zarr
 
-from fractal_tasks_template.example_segmentation_task import (
-    example_segmentation_task,
+from fractal_tasks_template.threshold_segmentation_task import (
+    threshold_segmentation_task,
 )
 from fractal_tasks_template.utils import (
     IteratorConfiguration,
@@ -26,7 +26,7 @@ from fractal_tasks_template.utils import (
         ((1, 1, 10, 64, 64), "tczyx"),
     ],
 )
-def test_example_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
+def test_threshold_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
     test_data_path = tmp_path / "data.zarr"
 
     if "c" in axes:
@@ -43,7 +43,7 @@ def test_example_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axes:
         axes_names=axes,
     )
     channel = ChannelSelectionModel(identifier="DAPI_0", mode="label")
-    example_segmentation_task(
+    threshold_segmentation_task(
         zarr_url=str(test_data_path), threshold=18252, channel=channel, overwrite=False
     )
 
@@ -62,7 +62,7 @@ def test_example_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axes:
         ((1, 1, 10, 64, 64), "tczyx"),
     ],
 )
-def test_example_segmentation_task_masked(
+def test_threshold_segmentation_task_masked(
     tmp_path: Path, shape: tuple[int, ...], axes: str
 ):
     test_data_path = tmp_path / "data.zarr"
@@ -86,7 +86,7 @@ def test_example_segmentation_task_masked(
         masking=MaskingConfiguration(mode="Label Name", identifier="nuclei_mask"),
         roi_table=None,
     )
-    example_segmentation_task(
+    threshold_segmentation_task(
         zarr_url=str(test_data_path),
         threshold=18252,
         channel=channel,

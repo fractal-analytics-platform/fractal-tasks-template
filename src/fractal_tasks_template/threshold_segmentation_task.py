@@ -1,7 +1,6 @@
 """This is the Python module for my_task."""
 
 import logging
-from typing import Optional
 
 import numpy as np
 from ngio import ChannelSelectionModel, open_ome_zarr_container
@@ -50,17 +49,17 @@ def segmentation_function(
 
 
 @validate_call
-def example_segmentation_task(
+def threshold_segmentation_task(
     *,
     # Fractal managed parameters
     zarr_url: str,
     # Segmentation parameters
     channel: ChannelSelectionModel,
-    label_name: Optional[str] = None,
+    label_name: str | None = None,
     threshold: int,
     min_size: int = 50,
     # Iteration parameters
-    iterator_configuration: Optional[IteratorConfiguration] = None,
+    iterator_configuration: IteratorConfiguration | None = None,
     overwrite: bool = True,
 ) -> None:
     """Threshold an image and find connected components.
@@ -155,4 +154,4 @@ def example_segmentation_task(
 if __name__ == "__main__":
     from fractal_task_tools.task_wrapper import run_fractal_task
 
-    run_fractal_task(task_function=example_segmentation_task)
+    run_fractal_task(task_function=threshold_segmentation_task)

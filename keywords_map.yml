@@ -1,0 +1,26 @@
+# Mapping of search -> replace (ordered, like the bash KEYWORD_MAP)
+keyword_map:
+    # Project
+    author_name: "BioVision Center Team"
+    author_email: "task_author@example.com"
+    project_name: "fractal-tasks-template"
+    package_name: "fractal_tasks_template"
+    project_url: "project_url.uzh.ch"
+    project_short_description: "Collection of example tasks for the Fractal framework"
+    project_license: "BSD-3-Clause"
+    # Task-specific
+    segmentation_task: "Threshold Segmentation"
+    segmentation_module: "threshold_segmentation_task"
+    image_processing_task: "!!!"
+    image_processing_module: "!!!"
+    feature_task: "!!!"
+    feature_module: "!!!"
+
+# Conditional files to exclude from the template
+# Files that include jinja placeholders that should only be present
+# if certain conditions are met (e.g. include_segmentation_task is true)
+# (pattern in filename -> condition variable)
+conditional_patterns:
+    segmentation_module: include_segmentation_task
+    image_processing_module: include_image_processing_task
+    feature_module: include_feature_task
