@@ -1,4 +1,4 @@
-"""Tests for valid task interface."""
+"""Tests for valid manifest."""
 
 import json
 

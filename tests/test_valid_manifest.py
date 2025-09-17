@@ -1,3 +1,5 @@
+"""Tests for valid manifest."""
+
 import json
 
 import requests
