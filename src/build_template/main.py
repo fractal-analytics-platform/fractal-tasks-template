@@ -229,9 +229,12 @@ def main(args: argparse.Namespace) -> int:
     for search, condition in conditional_patterns.items():
         for static_file in path_generator(template_dir):
             if search in static_file.name:
-                new_stem = (
-                    "{% if " + condition + " %}" + static_file.stem + "{% endif %}"
-                )
+                if static_file.suffix == ".jinja":
+                    # Remove .jinja to avoid double .jinja.jinja extension
+                    old_name = static_file.stem
+                else:
+                    old_name = static_file.name
+                new_stem = "{% if " + condition + " %}" + old_name + "{% endif %}"
                 new_name = new_stem + ".jinja"
                 new_path = static_file.parent / new_name
                 move_path(static_file, new_path)
