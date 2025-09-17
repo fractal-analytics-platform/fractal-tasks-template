@@ -56,7 +56,7 @@ include_segmentation_task:
   default: true
 
 segmentation_task:
-  when: "{{ mode == 'customize' and include_segmentation_tasks }}"
+  when: "{{ mode == 'customize' and include_segmentation_task }}"
   help: >
     Name of the segmentation task (e.g., Threshold Segmentation). 
     This is how the task will be listed in the Fractal web interface.
