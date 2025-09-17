@@ -5,7 +5,7 @@ from fractal_task_tools.task_models import (
 )
 
 AUTHORS = "Fractal Core Team"
-DOCS_LINK = None
+DOCS_LINK = "project_url.uzh.ch"
 INPUT_MODELS = [
     ("ngio", "images/_image.py", "ChannelSelectionModel"),
     (

@@ -1,5 +1,5 @@
 ### Purpose
-- Description of task functionality: Threshold an image and find connected components.
+- Description of task functionality
 - Bullet points that cover main features of the tasks.
 - Can use **full** *markdown* formatting (including embedding images).
 
