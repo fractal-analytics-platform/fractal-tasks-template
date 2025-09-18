@@ -1,0 +1,129 @@
+"""This is the Python module for my_task."""
+
+import logging
+from typing import Optional
+
+from dask import array as da
+from ngio import open_ome_zarr_container
+from ngio.experimental.iterators import ImageProcessingIterator
+from pydantic import validate_call
+from scipy.ndimage import gaussian_filter
+
+
+def compute_gaussian_blur(image: da.Array, sigma: tuple[float, ...]) -> da.Array:
+    """Apply Gaussian blur to a Dask array image.
+
+    Args:
+        image (da.Array): Input image as a Dask array.
+        sigma (tuple[float, ...]): Standard deviation for Gaussian kernel.
+
+    Returns:
+        da.Array: Blurred image as a Dask array.
+    """
+
+    # Apply Gaussian filter to each chunk
+    def apply_gaussian(chunk):
+        return gaussian_filter(chunk, sigma=sigma)
+
+    assert image.ndim in (3, 4), "Image must be 2D or 3D (+channel)"
+    assert len(sigma) == image.ndim, "Sigma must match image dimensions"
+    blurred_image = image.map_blocks(apply_gaussian, dtype=image.dtype)
+    return blurred_image
+
+
+@validate_call
+def {{ image_processing_module }}(
+    *,
+    # Fractal managed parameters
+    zarr_url: str,
+    # Input parameters
+    output_image_suffix: str = "gaussian_blur",
+    sigma_xy: float = 1.0,
+    sigma_z: Optional[float] = None,
+    overwrite_input: bool = False,
+    overwrite: bool = True,
+) -> dict:
+    """Apply a Gaussian blur to the input image.
+
+    Args:
+        zarr_url (str): URL to the OME-Zarr container
+        output_image_suffix (str): Suffix for the output image name.
+        sigma_xy (float): Standard deviation for Gaussian kernel in the XY plane.
+            Defaults to 1.0.
+        sigma_z (Optional[float]): Standard deviation for Gaussian kernel
+            in the Z direction. If None, the smoothing will be applied only in XY.
+        overwrite_input (bool): Whether to overwrite the input image with the output.
+            Defaults to False.
+        overwrite (bool): Whether to overwrite an existing label image.
+            Defaults to True.
+    """
+    # Use the first of input_paths
+    logging.info(f"{zarr_url=}")
+
+    # Open the OME-Zarr container
+    ome_zarr = open_ome_zarr_container(zarr_url)
+    logging.info(f"{ome_zarr=}")
+
+    *zarr_dir_, image_name = zarr_url.rstrip("/").split("/")
+    zarr_dir = "/".join(zarr_dir_)
+
+    output_image_name = f"{image_name}_{output_image_suffix}"
+    output_image_name = output_image_name.rstrip().lstrip().replace(" ", "_")
+    logging.info(f"New image name: {output_image_name}")
+
+    new_ome_zarr_path = f"{zarr_dir}/{output_image_name}"
+    new_ome_zarr = ome_zarr.derive_image(
+        store=new_ome_zarr_path,
+        name=output_image_name,
+        overwrite=overwrite,
+    )
+    logging.info(f"New OME-Zarr created at {new_ome_zarr_path=}")
+    input_image = ome_zarr.get_image()
+    output_image = new_ome_zarr.get_image()
+
+    if sigma_z is None:
+        # If sigma_z is not provided, apply 2D Gaussian blur
+        axes_order = "cyx"
+        sigma = (1, sigma_xy, sigma_xy)
+    else:
+        # If sigma_z is provided, apply 3D Gaussian blur
+        axes_order = "czyx"
+        sigma = (1, sigma_z, sigma_xy, sigma_xy)
+
+    logging.info(f"Running Gaussian blur with sigma={sigma} on axes {axes_order}")
+    iterator = ImageProcessingIterator(
+        input_image=input_image, output_image=output_image, axes_order=axes_order
+    )
+
+    if sigma_z is None:
+        # Set iterator to process by YX planes for 2D Gaussian blur
+        # all other axes are broadcasted
+        iterator = iterator.by_yx()
+        logging.info("Iterator set to by_yx() for 2D Gaussian blur")
+    else:
+        # Set iterator to process by ZYX volumes for 3D Gaussian blur
+        # all other axes are broadcasted
+        iterator = iterator.by_zyx()
+        logging.info("Iterator set to by_zyx() for 3D Gaussian blur")
+
+    for input_data, writer in iterator.iter_as_dask():
+        blurred_data = compute_gaussian_blur(input_data, sigma=sigma)
+        writer(blurred_data)
+
+    logging.info("Gaussian blur processing complete.")
+    # Area, mean intensity, and other measurements can be computed here
+    image_list_update_dict = {
+        "image_list_updates": [
+            {
+                "zarr_url": new_ome_zarr_path,
+                "origin": zarr_url,
+            }
+        ]
+    }
+    return image_list_update_dict
+
+
+if __name__ == "__main__":
+    from fractal_task_tools.task_wrapper import run_fractal_task
+
+    run_fractal_task(task_function={{ image_processing_module }})

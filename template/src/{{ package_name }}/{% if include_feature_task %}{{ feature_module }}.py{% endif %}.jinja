@@ -1,0 +1,65 @@
+"""This is the Python module for my_task."""
+
+import logging
+
+from ngio import open_ome_zarr_container
+from ngio.experimental.iterators import FeatureExtractorIterator
+from pydantic import validate_call
+
+
+@validate_call
+def {{ feature_module }}(
+    *,
+    # Fractal managed parameters
+    zarr_url: str,
+    # Input parameters
+    label_image_name: str,
+    output_table_name: str = "region_props_features",
+    overwrite: bool = True,
+) -> None:
+    """Extract region properties features from the input image.
+
+    Args:
+        zarr_url (str): URL to the OME-Zarr container
+        label_image_name (str): Name of the label image to analyze.
+        output_table_name (str): Name for the output feature table.
+        overwrite (bool): Whether to overwrite an existing feature table.
+            Defaults to True.
+    """
+    # Use the first of input_paths
+    logging.info(f"{zarr_url=}")
+
+    # Open the OME-Zarr container
+    ome_zarr = open_ome_zarr_container(zarr_url)
+    logging.info(f"{ome_zarr=}")
+
+    # Get the label image at the highest resolution available
+    label_image = ome_zarr.get_label(name=label_image_name)
+
+    # This will raise an error if no image matches the pixel size of the label image
+    image = ome_zarr.get_image(pixel_size=label_image.pixel_size, strict=True)
+    logging.info(f"{image=}")
+    logging.info(f"{label_image=}")
+
+    if not overwrite and output_table_name in ome_zarr.list_tables():
+        raise FileExistsError(
+            f"Table {output_table_name} already exists. "
+            "Set overwrite=True to overwrite it."
+        )
+    # Create an iterator to process the image and extract features
+    iterator = FeatureExtractorIterator(
+        input_image=image,
+        input_label=label_image,
+        axes_order="czyx",
+    )
+    iterator = iterator.by_zyx(strict=False)
+    for _, _, _ in iterator.iter_as_numpy():
+        pass
+
+    return None
+
+
+if __name__ == "__main__":
+    from fractal_task_tools.task_wrapper import run_fractal_task
+
+    run_fractal_task(task_function={{ feature_module }})

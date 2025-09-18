@@ -8,7 +8,7 @@
         "Instance Segmentation",
         "Classical segmentation"
       ],
-      "docs_info": "### Purpose\n- Description of task functionality: Threshold an image and find connected components.\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
+      "docs_info": "### Purpose\n- Description and documentation of the Task functionality\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
       "type": "parallel",
       "executable_parallel": "threshold_segmentation_task.py",
       "meta_parallel": {
@@ -130,7 +130,118 @@
         ],
         "type": "object",
         "title": "ThresholdSegmentationTask"
-      }
+      },
+      "docs_link": "project_url.uzh.ch"
+    },
+    {
+      "name": "Gaussian Blur",
+      "category": "Image Processing",
+      "tags": [
+        "Denoising",
+        "Gaussian Blur"
+      ],
+      "docs_info": "### Purpose\n- Description and documentation of the Task functionality\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
+      "type": "parallel",
+      "executable_parallel": "gaussian_blur_task.py",
+      "meta_parallel": {
+        "cpus_per_task": 1,
+        "mem": 4000
+      },
+      "args_schema_parallel": {
+        "additionalProperties": false,
+        "properties": {
+          "zarr_url": {
+            "title": "Zarr Url",
+            "type": "string",
+            "description": "URL to the OME-Zarr container"
+          },
+          "output_image_suffix": {
+            "default": "gaussian_blur",
+            "title": "Output Image Suffix",
+            "type": "string",
+            "description": "Suffix for the output image name."
+          },
+          "sigma_xy": {
+            "default": 1.0,
+            "title": "Sigma Xy",
+            "type": "number",
+            "description": "Standard deviation for Gaussian kernel in the XY plane. Defaults to 1.0."
+          },
+          "sigma_z": {
+            "title": "Sigma Z",
+            "type": "number",
+            "description": "Standard deviation for Gaussian kernel in the Z direction. If None, the smoothing will be applied only in XY."
+          },
+          "overwrite_input": {
+            "default": false,
+            "title": "Overwrite Input",
+            "type": "boolean",
+            "description": "Whether to overwrite the input image with the output. Defaults to False."
+          },
+          "overwrite": {
+            "default": true,
+            "title": "Overwrite",
+            "type": "boolean",
+            "description": "Whether to overwrite an existing label image. Defaults to True."
+          }
+        },
+        "required": [
+          "zarr_url"
+        ],
+        "type": "object",
+        "title": "GaussianBlurTask"
+      },
+      "docs_link": "project_url.uzh.ch"
+    },
+    {
+      "name": "Region Props Features",
+      "category": "Measurement",
+      "tags": [
+        "Region Properties",
+        "Intensity",
+        "Morphology"
+      ],
+      "docs_info": "### Purpose\n- Description of task functionality\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
+      "type": "parallel",
+      "executable_parallel": "region_props_features_task.py",
+      "meta_parallel": {
+        "cpus_per_task": 1,
+        "mem": 4000
+      },
+      "args_schema_parallel": {
+        "additionalProperties": false,
+        "properties": {
+          "zarr_url": {
+            "title": "Zarr Url",
+            "type": "string",
+            "description": "URL to the OME-Zarr container"
+          },
+          "label_image_name": {
+            "title": "Label Image Name",
+            "type": "string",
+            "description": "Name of the label image to analyze."
+          },
+          "output_table_name": {
+            "default": "region_props_features",
+            "title": "Output Table Name",
+            "type": "string",
+            "description": "Name for the output feature table."
+          },
+          "overwrite": {
+            "default": true,
+            "title": "Overwrite",
+            "type": "boolean",
+            "description": "Whether to overwrite an existing feature table. Defaults to True."
+          }
+        },
+        "required": [
+          "zarr_url",
+          "label_image_name"
+        ],
+        "type": "object",
+        "title": "RegionPropsFeaturesTask"
+      },
+      "docs_link": "project_url.uzh.ch"
     }
   ],
   "has_args_schemas": true,

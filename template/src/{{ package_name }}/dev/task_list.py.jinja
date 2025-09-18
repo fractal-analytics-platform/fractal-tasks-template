@@ -21,7 +21,7 @@ INPUT_MODELS = [
 ]
 
 TASK_LIST = [
-    {% if include_segmentation_tasks %}
+    {% if include_segmentation_task %}
     ParallelTask(
         name="{{ segmentation_task }}",
         executable="{{ segmentation_module }}.py",
@@ -29,6 +29,26 @@ TASK_LIST = [
         category="Segmentation",
         tags=["Instance Segmentation", "Classical segmentation"],
         docs_info="file:docs_info/{{ segmentation_module }}.md",
+    ),
+    {% endif %}
+    {% if include_image_processing_task %}
+    ParallelTask(
+        name="{{ image_processing_task }}",
+        executable="{{ image_processing_module }}.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Image Processing",
+        tags=["Denoising", "{{ image_processing_task }}"],
+        docs_info="file:docs_info/{{ image_processing_module }}.md",
+    ),
+    {% endif %}
+    {% if include_feature_task %}
+    ParallelTask(
+        name="{{ feature_task }}",
+        executable="{{ feature_module }}.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Measurement",
+        tags=["Region Properties", "Intensity", "Morphology"],
+        docs_info="file:docs_info/{{ feature_module }}.md",
     ),
     {% endif %}
 ]

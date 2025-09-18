@@ -11,10 +11,10 @@ keyword_map:
     # Task-specific
     segmentation_task: "Threshold Segmentation"
     segmentation_module: "threshold_segmentation_task"
-    image_processing_task: "!!!"
-    image_processing_module: "!!!"
-    feature_task: "!!!"
-    feature_module: "!!!"
+    image_processing_task: "Gaussian Blur"
+    image_processing_module: "gaussian_blur_task"
+    feature_task: "Region Props Features"
+    feature_module: "region_props_features_task"
 
 # Conditional files to exclude from the template
 # Files that include jinja placeholders that should only be present

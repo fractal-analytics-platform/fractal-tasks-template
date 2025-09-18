@@ -21,7 +21,7 @@ INPUT_MODELS = [
 ]
 
 TASK_LIST = [
-    # --- #{% if include_segmentation_tasks %}
+    # --- #{% if include_segmentation_task %}
     ParallelTask(
         name="Threshold Segmentation",
         executable="threshold_segmentation_task.py",
@@ -29,6 +29,26 @@ TASK_LIST = [
         category="Segmentation",
         tags=["Instance Segmentation", "Classical segmentation"],
         docs_info="file:docs_info/threshold_segmentation_task.md",
+    ),
+    # --- #{% endif %}
+    # --- #{% if include_image_processing_task %}
+    ParallelTask(
+        name="Gaussian Blur",
+        executable="gaussian_blur_task.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Image Processing",
+        tags=["Denoising", "Gaussian Blur"],
+        docs_info="file:docs_info/gaussian_blur_task.md",
+    ),
+    # --- #{% endif %}
+    # --- #{% if include_feature_task %}
+    ParallelTask(
+        name="Region Props Features",
+        executable="region_props_features_task.py",
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Measurement",
+        tags=["Region Properties", "Intensity", "Morphology"],
+        docs_info="file:docs_info/region_props_features_task.md",
     ),
     # --- #{% endif %}
 ]
