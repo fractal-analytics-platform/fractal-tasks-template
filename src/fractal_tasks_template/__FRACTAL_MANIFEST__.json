@@ -153,7 +153,7 @@
           "zarr_url": {
             "title": "Zarr Url",
             "type": "string",
-            "description": "URL to the OME-Zarr container"
+            "description": "URL to the OME-Zarr container."
           },
           "output_image_suffix": {
             "default": "gaussian_blur",
@@ -172,17 +172,17 @@
             "type": "number",
             "description": "Standard deviation for Gaussian kernel in the Z direction. If None, the smoothing will be applied only in XY."
           },
-          "overwrite_input": {
-            "default": false,
-            "title": "Overwrite Input",
-            "type": "boolean",
-            "description": "Whether to overwrite the input image with the output. Defaults to False."
-          },
           "overwrite": {
             "default": true,
             "title": "Overwrite",
             "type": "boolean",
-            "description": "Whether to overwrite an existing label image. Defaults to True."
+            "description": "Whether to overwrite an existing output image. Defaults to True."
+          },
+          "overwrite_input": {
+            "default": false,
+            "title": "Overwrite Input",
+            "type": "boolean",
+            "description": "If True, the task will first create a new OME-Zarr image with the Gaussian blur applied, and then overwrite the original image with the new one. Defaults to False."
           }
         },
         "required": [
@@ -201,7 +201,7 @@
         "Intensity",
         "Morphology"
       ],
-      "docs_info": "### Purpose\n- Description of task functionality\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
+      "docs_info": "### Purpose\n- Description and documentation of the Task functionality\n- Bullet points that cover main features of the tasks.\n- Can use **full** *markdown* formatting (including embedding images).\n\n### Outputs\n- Optional section on what kind of outputs the task generates. For the thresholding_task: Generates a new label image named `label_name`.\n\n### Limitations\n- List known limitations of the task (e.g. only works for certain data types).",
       "type": "parallel",
       "executable_parallel": "region_props_features_task.py",
       "meta_parallel": {

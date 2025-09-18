@@ -1,6 +1,8 @@
 """This is the Python module for my_task."""
 
 import logging
+import os
+import shutil
 from typing import Optional
 
 from dask import array as da
@@ -40,22 +42,23 @@ def {{ image_processing_module }}(
     output_image_suffix: str = "gaussian_blur",
     sigma_xy: float = 1.0,
     sigma_z: Optional[float] = None,
-    overwrite_input: bool = False,
     overwrite: bool = True,
+    overwrite_input: bool = False,
 ) -> dict:
-    """Apply a Gaussian blur to the input image.
+    """Apply a Gaussian blur to the input image and save the result as a OME-Zarr image.
 
     Args:
-        zarr_url (str): URL to the OME-Zarr container
+        zarr_url (str): URL to the OME-Zarr container.
         output_image_suffix (str): Suffix for the output image name.
         sigma_xy (float): Standard deviation for Gaussian kernel in the XY plane.
             Defaults to 1.0.
         sigma_z (Optional[float]): Standard deviation for Gaussian kernel
             in the Z direction. If None, the smoothing will be applied only in XY.
-        overwrite_input (bool): Whether to overwrite the input image with the output.
-            Defaults to False.
-        overwrite (bool): Whether to overwrite an existing label image.
+        overwrite (bool): Whether to overwrite an existing output image.
             Defaults to True.
+        overwrite_input (bool): If True, the task will first create a new
+            OME-Zarr image with the Gaussian blur applied, and then overwrite
+            the original image with the new one. Defaults to False.
     """
     # Use the first of input_paths
     logging.info(f"{zarr_url=}")
@@ -110,14 +113,23 @@ def {{ image_processing_module }}(
         blurred_data = compute_gaussian_blur(input_data, sigma=sigma)
         writer(blurred_data)
 
+    if overwrite_input:
+        logging.info("Replace original zarr image with the newly created Zarr image")
+        # Potential for race conditions: Every acquisition reads the
+        # reference acquisition, but the reference acquisition also gets
+        # modified
+        # See issue #516 for the details
+        os.rename(new_ome_zarr_path, zarr_url)
+        shutil.rmtree(new_ome_zarr_path)
+        update_dict = {"zarr_url": zarr_url}
+    else:
+        update_dict = {"zarr_url": new_ome_zarr_path, "origin": zarr_url}
+
     logging.info("Gaussian blur processing complete.")
     # Area, mean intensity, and other measurements can be computed here
     image_list_update_dict = {
         "image_list_updates": [
-            {
-                "zarr_url": new_ome_zarr_path,
-                "origin": zarr_url,
-            }
+            update_dict,
         ]
     }
     return image_list_update_dict

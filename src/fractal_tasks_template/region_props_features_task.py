@@ -35,6 +35,7 @@ def region_props_features_func(image: np.ndarray, label: np.ndarray, roi: Roi) -
             "std_intensity",
         ],
     )
+    # Add some more metadata columns
     num_regions = len(props["label"])
     props["region"] = [roi.get_name()] * num_regions
     props["time"] = [roi.t] * num_regions
@@ -68,7 +69,9 @@ def region_props_features_task(
     output_table_name: str = "region_props_features",
     overwrite: bool = True,
 ) -> None:
-    """Extract region properties features from the input image.
+    """Extract region props. features from a OME-Zarr image and save them as a table.
+
+    This task requires a label image to be present in the OME-Zarr container.
 
     Args:
         zarr_url (str): URL to the OME-Zarr container

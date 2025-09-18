@@ -63,7 +63,7 @@ def threshold_segmentation_task(
     iterator_configuration: Optional[IteratorConfiguration] = None,
     overwrite: bool = True,
 ) -> None:
-    """Threshold an image and find connected components.
+    """Segment an image using a simple thresholding method.
 
     Args:
         zarr_url (str): URL to the OME-Zarr container
