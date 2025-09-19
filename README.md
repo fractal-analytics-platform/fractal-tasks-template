@@ -89,3 +89,14 @@ copier update
 ```
 See [copier docs](https://copier.readthedocs.io/en/stable/updating) for more
 details.
+
+## Contributing
+
+Contributions to this template are welcome!
+
+The `template` directory contains the actual template files, with will be used by `copier` to create new repositories. 
+This directory should not be modified manually. But it is automatically created by running
+```console
+pixi run python src/build_template/main.py
+```
+

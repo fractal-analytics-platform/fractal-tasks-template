@@ -1,3 +1,26 @@
+source_dir: "."  # Directory containing the source files to build the template
+template_dir: "template"  # Directory where the template will be built
+static_template_dir: "static_template"  # Directory with static files to be included as-is
+
+# These files and directories will be copied from source_dir to template_dir
+to_be_included: [
+    "src",
+    "tests",
+    "pyproject.toml",
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    ".github",
+]
+
+# These files and directories will be removed from the template_dir after rendering
+to_be_excluded: [
+    "src/build_template",
+    "tests/copier",
+    ".github/workflows/copier_ci.yml",
+    ".github/workflows/github_release.yaml",
+    ".github/workflows/github_release.yml",
+]
+
 # Mapping of search -> replace (ordered, like the bash KEYWORD_MAP)
 keyword_map:
     # Project

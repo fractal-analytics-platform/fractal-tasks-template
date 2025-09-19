@@ -22,33 +22,6 @@ from pathlib import Path
 
 import yaml
 
-# ---- Constants and variables (safe zone to edit) ----
-
-source_dir = Path(".")  # Directory containing the source files to build the template
-template_dir = Path("template")  # Directory where the template will be built
-static_template_dir = Path("static_template")  # Directory with static files to copy
-
-# These files and directories will be copied from SOURCE_DIR to TEMPLATE_DIR
-to_be_included = [
-    "src",
-    "tests",
-    "pyproject.toml",
-    ".gitignore",
-    ".pre-commit-config.yaml",
-    ".github",
-]
-
-# These files and directories will be removed from TEMPLATE_DIR after copying
-to_be_excluded = [
-    Path("src") / "build_template",
-    Path("tests") / "copier",
-    Path(".github") / "workflows" / "copier_ci.yml",
-    Path(".github") / "workflows" / "github_release.yaml",
-    Path(".github") / "workflows" / "github_release.yml",
-]
-
-# End of editable zone
-
 # Patterns to exclude when listing files
 _exclusion_patterns = [
     "*.pyc",
@@ -77,7 +50,7 @@ def parse_args() -> argparse.Namespace:
         "--config",
         type=Path,
         help="Path to the YAML configuration file for keyword mappings",
-        default=Path("keywords_map.yml"),
+        default=Path("build_template_config.yml"),
     )
 
     parser.add_argument(
@@ -168,6 +141,11 @@ def main(args: argparse.Namespace) -> int:
     with args.config.open("r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
+    template_dir: Path = Path(config["template_dir"])
+    source_dir: Path = Path(config["source_dir"])
+    static_template_dir: Path = Path(config["static_template_dir"])
+    to_be_included: list[str] = config["to_be_included"]
+    to_be_excluded: list[str] = config["to_be_excluded"]
     keyword_map: dict[str, str] = config["keyword_map"]
 
     conditional_patterns: dict[str, str] = config["conditional_patterns"]
