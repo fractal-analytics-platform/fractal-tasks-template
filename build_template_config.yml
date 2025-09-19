@@ -1,3 +1,6 @@
+# Configuration file for building the template
+# using the build_template/main.py script
+
 source_dir: "."  # Directory containing the source files to build the template
 template_dir: "template"  # Directory where the template will be built
 static_template_dir: "static_template"  # Directory with static files to be included as-is
@@ -21,7 +24,10 @@ to_be_excluded: [
     ".github/workflows/github_release.yml",
 ]
 
-# Mapping of search -> replace (ordered, like the bash KEYWORD_MAP)
+# The build script will search for these keywords (the values) 
+# in the files listed in to_be_included
+# and replace them with the corresponding {{ key }} jinja placeholder.
+# Mapping of replace <- search
 keyword_map:
     # Project
     author_name: "BioVision Center Team"

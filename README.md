@@ -95,8 +95,16 @@ details.
 Contributions to this template are welcome!
 
 The `template` directory contains the actual template files, with will be used by `copier` to create new repositories. 
-This directory should not be modified manually. But it is automatically created by running
+This directory should never be modified directly, but only through the `src/build_template/main.py` script.
 ```console
 pixi run python src/build_template/main.py
 ```
+Everytime there is a change in the repo, run the above command to update the `template` directory.
 
+If you rename files, directories, or refactor the code, please make sure that 
+the `build_template_config.yml` file in the root directory is updated accordingly.
+This file is used by the script in `src/build_template/main.py` to copy static files and rename files and directories
+when building the template.
+
+If you want to add a commented line that should be uncommented in the generated template,
+please add `# --- #` at the beginning of the line (see the `dev/task_list.py` file for an example).
