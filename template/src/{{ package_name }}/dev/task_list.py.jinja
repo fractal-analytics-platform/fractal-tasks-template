@@ -25,6 +25,8 @@ TASK_LIST = [
     ParallelTask(
         name="{{ segmentation_task }}",
         executable="{{ segmentation_module }}.py",
+        # Modify the meta according to your task requirements
+        # If the task requires a GPU, add "needs_gpu": True
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Segmentation",
         tags=["Instance Segmentation", "Classical segmentation"],
@@ -35,16 +37,24 @@ TASK_LIST = [
     ParallelTask(
         name="{{ image_processing_task }}",
         executable="{{ image_processing_module }}.py",
+        # Modify the meta according to your task requirements
+        # If the task requires a GPU, add "needs_gpu": True
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Image Processing",
         tags=["Denoising", "{{ image_processing_task }}"],
         docs_info="file:docs_info/{{ image_processing_module }}.md",
+        # Uncomment the following line to forbid re-running the task on already
+        # processed images
+        # input_types={"is_blurred": False},
+        output_types={"is_blurred": True},
     ),
     {% endif %}
     {% if include_feature_task %}
     ParallelTask(
         name="{{ feature_task }}",
         executable="{{ feature_module }}.py",
+        # Modify the meta according to your task requirements
+        # If the task requires a GPU, add "needs_gpu": True
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Measurement",
         tags=["Region Properties", "Intensity", "Morphology"],

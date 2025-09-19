@@ -2,6 +2,7 @@
 
 import logging
 import os
+import pathlib
 import shutil
 from typing import Optional
 
@@ -29,6 +30,9 @@ def compute_gaussian_blur(image: da.Array, sigma: tuple[float, ...]) -> da.Array
 
     assert image.ndim in (3, 4), "Image must be 2D or 3D (+channel)"
     assert len(sigma) == image.ndim, "Sigma must match image dimensions"
+    # This will itroduce some edge artifacts at chunk boundaries
+    # In a real application, consider using map_overlap to mitigate this
+    # With appropriate depth based on sigma
     blurred_image = image.map_blocks(apply_gaussian, dtype=image.dtype)
     return blurred_image
 
@@ -44,7 +48,7 @@ def {{ image_processing_module }}(
     sigma_z: Optional[float] = None,
     overwrite: bool = True,
     overwrite_input: bool = False,
-) -> dict:
+) -> dict | None:
     """Apply a Gaussian blur to the input image and save the result as a OME-Zarr image.
 
     Args:
@@ -67,31 +71,34 @@ def {{ image_processing_module }}(
     ome_zarr = open_ome_zarr_container(zarr_url)
     logging.info(f"{ome_zarr=}")
 
-    *zarr_dir_, image_name = zarr_url.rstrip("/").split("/")
-    zarr_dir = "/".join(zarr_dir_)
+    zarr_path = pathlib.Path(zarr_url)
+    zarr_dir, image_name = zarr_path.parent, zarr_path.stem
+    logging.info(f"Input image name: {image_name}")
 
-    output_image_name = f"{image_name}_{output_image_suffix}"
-    output_image_name = output_image_name.rstrip().lstrip().replace(" ", "_")
+    output_image_suffix = (
+        output_image_suffix.strip().lstrip().rstrip().replace(" ", "_")
+    )
+    output_image_name = f"{image_name}_{output_image_suffix}{zarr_path.suffix}"
     logging.info(f"New image name: {output_image_name}")
 
-    new_ome_zarr_path = f"{zarr_dir}/{output_image_name}"
-    new_ome_zarr = ome_zarr.derive_image(
-        store=new_ome_zarr_path,
+    output_zarr_path = zarr_dir / output_image_name
+    output_ome_zarr = ome_zarr.derive_image(
+        store=output_zarr_path,
         name=output_image_name,
         overwrite=overwrite,
     )
-    logging.info(f"New OME-Zarr created at {new_ome_zarr_path=}")
+    logging.info(f"New OME-Zarr created at {output_zarr_path=}")
     input_image = ome_zarr.get_image()
-    output_image = new_ome_zarr.get_image()
+    output_image = output_ome_zarr.get_image()
 
     if sigma_z is None:
         # If sigma_z is not provided, apply 2D Gaussian blur
         axes_order = "cyx"
-        sigma = (1, sigma_xy, sigma_xy)
+        sigma = (0, sigma_xy, sigma_xy)
     else:
         # If sigma_z is provided, apply 3D Gaussian blur
         axes_order = "czyx"
-        sigma = (1, sigma_z, sigma_xy, sigma_xy)
+        sigma = (0, sigma_z, sigma_xy, sigma_xy)
 
     logging.info(f"Running Gaussian blur with sigma={sigma} on axes {axes_order}")
     iterator = ImageProcessingIterator(
@@ -109,9 +116,20 @@ def {{ image_processing_module }}(
         iterator = iterator.by_zyx()
         logging.info("Iterator set to by_zyx() for 3D Gaussian blur")
 
+    # If you would like to iterate over arbitrary region of interests (ROIs),
+    # you can uncomment the following line and provide the ROIs
+    # table = ome_zarr.get_generic_roi_table(name="my_roi_table")
+    # iterator = iterator.product(table)
+    #
+    # Core processing loop
+    #
     for input_data, writer in iterator.iter_as_dask():
         blurred_data = compute_gaussian_blur(input_data, sigma=sigma)
         writer(blurred_data)
+
+    # No need to call output_image.consolidate()
+    # ImageProcessingIterator handles this
+    logging.info("Gaussian blur processing complete.")
 
     if overwrite_input:
         logging.info("Replace original zarr image with the newly created Zarr image")
@@ -119,18 +137,16 @@ def {{ image_processing_module }}(
         # reference acquisition, but the reference acquisition also gets
         # modified
         # See issue #516 for the details
-        os.rename(new_ome_zarr_path, zarr_url)
-        shutil.rmtree(new_ome_zarr_path)
-        update_dict = {"zarr_url": zarr_url}
-    else:
-        update_dict = {"zarr_url": new_ome_zarr_path, "origin": zarr_url}
 
-    logging.info("Gaussian blur processing complete.")
-    # Area, mean intensity, and other measurements can be computed here
+        backup_path = zarr_path.parent / f"{zarr_path.stem}_backup{zarr_path.suffix}"
+        os.rename(zarr_path, backup_path)
+        os.rename(output_zarr_path, zarr_path)
+        shutil.rmtree(f"{backup_path}", ignore_errors=False)
+        # If we are overwriting the input, there is no need to update the image list
+        return None
+
     image_list_update_dict = {
-        "image_list_updates": [
-            update_dict,
-        ]
+        "image_list_updates": [{"zarr_url": str(output_zarr_path), "origin": zarr_url}]
     }
     return image_list_update_dict
 
