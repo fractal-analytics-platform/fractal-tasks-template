@@ -105,9 +105,14 @@ def gaussian_blur_task(
         input_image=input_image, output_image=output_image, axes_order=axes_order
     )
 
-    if sigma_z is None:
+    if output_ome_zarr.is_2d:
         # Set iterator to process by YX planes for 2D Gaussian blur
         # all other axes are broadcasted
+        if output_ome_zarr.is_2d and sigma_z is not None:
+            raise ValueError(
+                "Cannot apply 3D Gaussian blur to a 2D image. "
+                "Please set sigma_z to None."
+            )
         iterator = iterator.by_yx()
         logging.info("Iterator set to by_yx() for 2D Gaussian blur")
     else:
