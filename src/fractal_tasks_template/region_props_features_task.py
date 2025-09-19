@@ -19,6 +19,8 @@ def region_props_features_func(image: np.ndarray, label: np.ndarray, roi: Roi) -
     )
     assert label.shape[-1] == 1, "Label image must have a single channel"
     label = label[..., 0]  # Remove channel dimension
+
+    # Perform region props extraction
     props = measure.regionprops_table(
         label,
         intensity_image=image,
@@ -36,6 +38,7 @@ def region_props_features_func(image: np.ndarray, label: np.ndarray, roi: Roi) -
         ],
     )
     # Add some more metadata columns
+    # for example, the ROI name and timepoint
     num_regions = len(props["label"])
     props["region"] = [roi.get_name()] * num_regions
     props["time"] = [roi.t] * num_regions
@@ -102,6 +105,8 @@ def region_props_features_task(
         )
 
     # Some of the features in regionprops fail if the image is has singleton on z
+    # By setting the axes_order to yxc we ensure to squeeze the z dimension
+    # for 2D images. For 3D images, we keep the z dimension
     axes_order = "yxc" if image.is_2d else "yxzc"
     # Create an iterator to process the image and extract features
     iterator = FeatureExtractorIterator(
@@ -109,8 +114,11 @@ def region_props_features_task(
         input_label=label_image,
         axes_order=axes_order,
     )
+    # Strict=True will raise an error if the image is not 3D (multiple z slices)
+    # If you want to allow 2D images, set strict=False
     iterator = iterator.by_zyx(strict=False)
 
+    # If you would like to iterate over arbitrary region of interests (ROIs),
     tables = []
     for input_data, label_data, roi in iterator.iter_as_numpy():
         _table_dict = region_props_features_func(
@@ -118,14 +126,19 @@ def region_props_features_task(
             label=label_data,
             roi=roi,
         )
+        # Feature ExtractorIterator does not handle writing, so we collect
+        # the tables and write them at the end
         tables.append(_table_dict)
 
     # Convert the tables to a DataFrame
     # Save the DataFrame as a table in the OME-Zarr container
     feature_df = join_tables(tables, index_key="label")
+
+    # Create a FeatureTable and add it to the OME-Zarr container
     feature_table = FeatureTable(
         table_data=feature_df, reference_label=label_image_name
     )
+    # Add the table to the OME-Zarr container
     ome_zarr.add_table(name=output_table_name, table=feature_table, overwrite=overwrite)
     logging.info(f"Feature table {output_table_name} added to OME-Zarr container.")
     return None

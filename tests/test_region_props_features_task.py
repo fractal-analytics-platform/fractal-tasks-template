@@ -27,7 +27,7 @@ from fractal_tasks_template.region_props_features_task import (
 def test_gaussian_blur_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
     test_data_path = tmp_path / "data.zarr"
 
-    create_synthetic_ome_zarr(
+    ome_zarr = create_synthetic_ome_zarr(
         store=test_data_path,
         shape=shape,
         overwrite=False,
@@ -36,3 +36,18 @@ def test_gaussian_blur_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
     region_props_features_task(
         zarr_url=str(test_data_path), label_image_name="nuclei", overwrite=False
     )
+
+    # Check that the feature table was created
+    assert "region_props_features" in ome_zarr.list_tables()
+    table_df = ome_zarr.get_feature_table(name="region_props_features").dataframe
+    # Check that the table is not empty
+    assert not table_df.empty
+    # Check if area and mean_intensity columns are present
+    assert all(col in table_df.columns for col in ["area", "mean_intensity-0"]), (
+        table_df.columns
+    )
+    # Check if label is the index
+    assert table_df.index.name == "label"
+    # DISCLAIMER: This is only a very basic test.
+    # More comprehensive tests should be implemented based on the expected
+    # results not only the presence of a feature table.

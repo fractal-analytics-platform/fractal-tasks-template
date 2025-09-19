@@ -33,6 +33,8 @@ dependencies = ["ngio==0.4.0a3", "scikit-image", "fractal-task-tools"]
 [project.optional-dependencies]
 dev = [
     "notebook",
+    "napari",
+    "pyqt5",
     "devtools",
     "hatch",
     "pytest",
