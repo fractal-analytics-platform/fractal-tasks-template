@@ -4,7 +4,7 @@ from fractal_task_tools.task_models import (
     ParallelTask,
 )
 
-AUTHORS = "Fractal Core Team"
+AUTHORS = "BioVision Center Team"
 DOCS_LINK = "project_url.uzh.ch"
 INPUT_MODELS = [
     ("ngio", "images/_image.py", "ChannelSelectionModel"),
