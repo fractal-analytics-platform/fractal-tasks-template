@@ -135,9 +135,6 @@
     },
     {
       "name": "Gaussian Blur",
-      "output_types": {
-        "is_blurred": true
-      },
       "category": "Image Processing",
       "tags": [
         "Denoising",
@@ -249,5 +246,5 @@
   ],
   "has_args_schemas": true,
   "args_schema_version": "pydantic_v2",
-  "authors": "Fractal Core Team"
+  "authors": "BioVision Center Team"
 }
