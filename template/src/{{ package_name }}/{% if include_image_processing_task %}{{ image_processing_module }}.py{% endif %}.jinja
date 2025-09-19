@@ -105,20 +105,15 @@ def {{ image_processing_module }}(
         input_image=input_image, output_image=output_image, axes_order=axes_order
     )
 
-    if output_ome_zarr.is_2d:
-        # Set iterator to process by YX planes for 2D Gaussian blur
-        # all other axes are broadcasted
-        if output_ome_zarr.is_2d and sigma_z is not None:
-            raise ValueError(
-                "Cannot apply 3D Gaussian blur to a 2D image. "
-                "Please set sigma_z to None."
-            )
+    if sigma_z is None:
         iterator = iterator.by_yx()
         logging.info("Iterator set to by_yx() for 2D Gaussian blur")
     else:
         # Set iterator to process by ZYX volumes for 3D Gaussian blur
         # all other axes are broadcasted
-        iterator = iterator.by_zyx()
+        # Strict=False means that if there no z axis or z is size 1, it will still work
+        # If your processing needs requires a volume, use strict=True
+        iterator = iterator.by_zyx(strict=False)
         logging.info("Iterator set to by_zyx() for 3D Gaussian blur")
 
     # If you would like to iterate over arbitrary region of interests (ROIs),
