@@ -175,9 +175,9 @@ def {{ segmentation_module }}(
             int_img=image_data, threshold=threshold, min_size=min_size
         )
         # Ensure unique labels across different chunks
-        label_img = np.where(label_img > 0, label_img + max_label, 0)
-        writer(label_img)
+        label_img = np.where(label_img == 0, 0, label_img + max_label)
         max_label = label_img.max()
+        writer(label_img)
     # No need to call label.consolidate()
     # SegmentationIterator handles this
     logging.info(f"label {label_name} successfully created at {zarr_url}")
