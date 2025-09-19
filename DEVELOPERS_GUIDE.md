@@ -194,7 +194,7 @@ within Fractal.
 
 ## Pre-commit
 
-This template uses `pre-commit` to run some checks before committing your changes. You set up pre-commit it via:
+This template uses `pre-commit` to run some checks before committing your changes. In case you have not installed the pre-commit hooks yet, you can do so by running:
 
 ```console
 pre-commit install
@@ -202,3 +202,7 @@ pre-commit install
 
 This will install the pre-commit hooks in your `.git/hooks` directory, and they will run every time you commit changes.
 This is particularly useful when working with other people, as it ensures that the code is formatted homogeneously.
+
+# Validate the manifest
+When you add or modify tasks, you should always check that the `__FRACTAL_MANIFEST__.json` file is valid, and that it will be correctly rendered in the Fractal UI.
+You can do so by uploading the `__FRACTAL_MANIFEST__.json` file to the [Fractal Web Sandbox](https://fractal-analytics-platform.github.io/fractal-web/sandbox/#task-manifest).
