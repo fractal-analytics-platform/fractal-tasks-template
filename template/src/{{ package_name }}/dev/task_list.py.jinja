@@ -5,7 +5,13 @@ from fractal_task_tools.task_models import (
 )
 
 AUTHORS = "{{ author_name }}"
+
+{% if project_url == "" %}
+DOCS_LINK = None
+{% else %}
 DOCS_LINK = "{{ project_url }}"
+{% endif %}
+
 INPUT_MODELS = [
     ("ngio", "images/_image.py", "ChannelSelectionModel"),
     (

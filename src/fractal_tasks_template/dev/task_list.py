@@ -5,7 +5,13 @@ from fractal_task_tools.task_models import (
 )
 
 AUTHORS = "BioVision Center Team"
+
+# --- #{% if project_url == "" %}
+# --- #DOCS_LINK = None
+# --- #{% else %}
 DOCS_LINK = "project_url.uzh.ch"
+# --- #{% endif %}
+
 INPUT_MODELS = [
     ("ngio", "images/_image.py", "ChannelSelectionModel"),
     (
