@@ -20,7 +20,8 @@ lib/
 lib64/
 parts/
 sdist/
-var/
+# var can not be ignored since it used in anndata
+# var/
 wheels/
 *.egg-info/
 .installed.cfg
