@@ -24,6 +24,7 @@ from fractal_tasks_template.gaussian_blur_task import (
     ],
 )
 def test_gaussian_blur_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
+    """Base test for the Gaussian blur task."""
     test_data_path = tmp_path / "data.zarr"
 
     create_synthetic_ome_zarr(
@@ -48,6 +49,7 @@ def test_gaussian_blur_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
 
 
 def test_gaussian_blur_task_overwrite(tmp_path: Path):
+    """Test if the overwrite functionality works as expected."""
     test_data_path = tmp_path / "data.zarr"
 
     create_synthetic_ome_zarr(

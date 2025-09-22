@@ -64,7 +64,6 @@ def gaussian_blur_task(
             OME-Zarr image with the Gaussian blur applied, and then overwrite
             the original image with the new one. Defaults to False.
     """
-    # Use the first of input_paths
     logging.info(f"{zarr_url=}")
 
     # Open the OME-Zarr container
@@ -133,11 +132,6 @@ def gaussian_blur_task(
 
     if overwrite_input:
         logging.info("Replace original zarr image with the newly created Zarr image")
-        # Potential for race conditions: Every acquisition reads the
-        # reference acquisition, but the reference acquisition also gets
-        # modified
-        # See issue #516 for the details
-
         backup_path = zarr_path.parent / f"{zarr_path.stem}_backup{zarr_path.suffix}"
         os.rename(zarr_path, backup_path)
         os.rename(output_zarr_path, zarr_path)

@@ -5,6 +5,7 @@ import logging
 import numpy as np
 import pandas as pd
 from ngio import Roi, open_ome_zarr_container
+from ngio.common.transforms import ZoomTransform
 from ngio.experimental.iterators import FeatureExtractorIterator
 from ngio.tables import FeatureTable
 from pydantic import validate_call
@@ -13,12 +14,14 @@ from skimage import measure
 
 def region_props_features_func(image: np.ndarray, label: np.ndarray, roi: Roi) -> dict:
     """Extract region properties features from a label image within a ROI."""
-    assert image.ndim in (3, 4), "Image must be 4D yxzc or 3D yxz"
+    assert image.ndim in (3, 4), "Image must be 3D yxc or 4D yxzc "
     assert image.ndim == label.ndim, (
         "Image and label must have the same number of dimensions"
     )
+    # Since we query the label image as yxc or yxzc, we need to ensure
+    # it has a single channel and we need to squeeze the channel dimension
     assert label.shape[-1] == 1, "Label image must have a single channel"
-    label = label[..., 0]  # Remove channel dimension
+    label = label[..., 0]
 
     # Perform region props extraction
     props = measure.regionprops_table(
@@ -83,22 +86,27 @@ def {{ feature_module }}(
         overwrite (bool): Whether to overwrite an existing feature table.
             Defaults to True.
     """
-    # Use the first of input_paths
     logging.info(f"{zarr_url=}")
 
     # Open the OME-Zarr container
     ome_zarr = open_ome_zarr_container(zarr_url)
     logging.info(f"{ome_zarr=}")
 
-    # Get the label image at the highest resolution available
-    label_image = ome_zarr.get_label(name=label_image_name)
-
-    # This will raise an error if no image matches the pixel size of the label image
-    image = ome_zarr.get_image(pixel_size=label_image.pixel_size, strict=True)
+    # Gete the image at the highest resolution available
+    image = ome_zarr.get_image()
     logging.info(f"{image=}")
+
+    # Get the label image at the closest resolution to the image
+    # If the label image does't have an exact match in pixel size, we
+    # get the closest one (strict=False)
+    label_image = ome_zarr.get_label(
+        name=label_image_name, pixel_size=image.pixel_size, strict=False
+    )
     logging.info(f"{label_image=}")
 
     if not overwrite and output_table_name in ome_zarr.list_tables():
+        # This is already checked in ome_zarr.add_table, but we check it here
+        # to fail early and avoid running the task unnecessarily
         raise FileExistsError(
             f"Table {output_table_name} already exists. "
             "Set overwrite=True to overwrite it."
@@ -108,17 +116,34 @@ def {{ feature_module }}(
     # By setting the axes_order to yxc we ensure to squeeze the z dimension
     # for 2D images. For 3D images, we keep the z dimension
     axes_order = "yxc" if image.is_2d else "yxzc"
+
+    # Since the label image might be at a different resolution than the image,
+    # we need to rescale it to match the image resolution
+    label_zoom_transform = ZoomTransform.from_dimensions(
+        original_dimension=label_image.dimensions,
+        target_dimension=image.dimensions,
+        order=0,  # Nearest neighbor for labels
+    )
+
     # Create an iterator to process the image and extract features
     iterator = FeatureExtractorIterator(
         input_image=image,
         input_label=label_image,
         axes_order=axes_order,
+        label_transforms=[label_zoom_transform],
     )
-    # Strict=True will raise an error if the image is not 3D (multiple z slices)
-    # If you want to allow 2D images, set strict=False
+    # We can iterate by_zyx even in a 2D case by setting strict to False.
+    # This way, the iterator will return 3D images if the OME-Zarr contains 3D data,
+    # but return 2D images otherwise
     iterator = iterator.by_zyx(strict=False)
 
     # If you would like to iterate over arbitrary region of interests (ROIs),
+    # you can uncomment the following line and provide the ROIs
+    # table = ome_zarr.get_generic_roi_table(name="my_roi_table")
+    # iterator = iterator.product(table)
+    #
+    # Core processing loop
+    #
     tables = []
     for input_data, label_data, roi in iterator.iter_as_numpy():
         _table_dict = region_props_features_func(
@@ -131,14 +156,13 @@ def {{ feature_module }}(
         tables.append(_table_dict)
 
     # Convert the tables to a DataFrame
-    # Save the DataFrame as a table in the OME-Zarr container
     feature_df = join_tables(tables, index_key="label")
 
     # Create a FeatureTable and add it to the OME-Zarr container
     feature_table = FeatureTable(
         table_data=feature_df, reference_label=label_image_name
     )
-    # Add the table to the OME-Zarr container
+    # Save the DataFrame as a table in the OME-Zarr container
     ome_zarr.add_table(name=output_table_name, table=feature_table, overwrite=overwrite)
     logging.info(f"Feature table {output_table_name} added to OME-Zarr container.")
     return None

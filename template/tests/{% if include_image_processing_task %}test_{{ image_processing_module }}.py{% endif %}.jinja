@@ -24,6 +24,7 @@ from {{ package_name }}.{{ image_processing_module }} import (
     ],
 )
 def test_{{ image_processing_module }}(tmp_path: Path, shape: tuple[int, ...], axes: str):
+    """Base test for the Gaussian blur task."""
     test_data_path = tmp_path / "data.zarr"
 
     create_synthetic_ome_zarr(
@@ -48,6 +49,7 @@ def test_{{ image_processing_module }}(tmp_path: Path, shape: tuple[int, ...], a
 
 
 def test_{{ image_processing_module }}_overwrite(tmp_path: Path):
+    """Test if the overwrite functionality works as expected."""
     test_data_path = tmp_path / "data.zarr"
 
     create_synthetic_ome_zarr(

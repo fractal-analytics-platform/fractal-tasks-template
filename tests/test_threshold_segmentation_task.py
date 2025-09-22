@@ -28,6 +28,7 @@ from fractal_tasks_template.utils import (
     ],
 )
 def test_threshold_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axes: str):
+    """Base test for the threshold segmentation task."""
     test_data_path = tmp_path / "data.zarr"
 
     if "c" in axes:
@@ -78,6 +79,7 @@ def test_threshold_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axe
 def test_threshold_segmentation_task_masked(
     tmp_path: Path, shape: tuple[int, ...], axes: str
 ):
+    """Test the threshold segmentation task with a masking configuration."""
     test_data_path = tmp_path / "data.zarr"
 
     if "c" in axes:
