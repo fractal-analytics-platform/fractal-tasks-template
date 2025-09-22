@@ -4,7 +4,7 @@
 #   BSD 3-Clause License
 #   Copyright (c) 2021, Talley Lambert
 
-_subdirectory: project
+_subdirectory: template
 _skip_if_exists:
   - README.md
 
@@ -27,17 +27,107 @@ project_name:
 
 package_name:
   help: Name of your top-level Python package (the one appearing in Python `import` statements)
-  default: "{{ project_name.lower().replace(' ', '_').replace('-', '_') }}"
+  default: "{{ project_name | lower | replace(' ', '_') | replace('-', '_') }}"
   validator: "{% if not package_name.isidentifier() %}Invalid package name{% endif %}"
 
 project_url:
   help: A URL for your project home page or documentation (optional)
   type: str
-  default: ''
+  default: ""
 
 project_short_description:
   help: A short description of the package
   default: Package description.
+
+# Task-specific questions
+mode:
+  help: Choose between a quick setup (all examples tasks included) or a customized setup (choose which type of tasks to include)
+  type: str
+  default: quick
+  choices:
+    - quick
+    - customize
+
+# Segmentation task configuration
+include_segmentation_task:
+  when: "{{ mode == 'customize' }}"
+  help: Include an example segmentation task?
+  type: bool
+  default: true
+
+segmentation_task:
+  when: "{{ mode == 'customize' and include_segmentation_task }}"
+  help: >
+    Name of the segmentation task (e.g., Threshold Segmentation). 
+    This is how the task will be listed in the Fractal web interface.
+  type: str
+  default: Threshold Segmentation
+  validator: >-
+    {% if not (segmentation_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
+    segmentation_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
+    {% endif %}
+    {% if segmentation_task | trim != segmentation_task %}
+    segmentation_task must not have leading or trailing spaces.
+    {% endif %}
+
+segmentation_module:
+  when: false
+  default: "{{ segmentation_task | lower | replace('-', '_') | replace(' ', '_') }}_task"
+  validator: "{% if not segmentation_module.isidentifier() %}Invalid segmentation module name{% endif %}"
+
+# Image processing task configuration
+include_image_processing_task:
+  when: "{{ mode == 'customize' }}"
+  help: Include an example image processing task?
+  type: bool
+  default: true
+
+image_processing_task:
+  when: "{{ mode == 'customize' and include_image_processing_task }}"
+  help: >
+    Name of the image processing task (e.g., Gaussian Blur). 
+    This is how the task will be listed in the Fractal web interface.
+  type: str
+  default: Gaussian Blur
+  validator: >-
+    {% if not (image_processing_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
+    image_processing_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
+    {% endif %}
+    {% if image_processing_task | trim != image_processing_task %}
+    image_processing_task must not have leading or trailing spaces.
+    {% endif %}
+
+image_processing_module:
+  when: false
+  default: "{{ image_processing_task | lower | replace('-', '_') | replace(' ', '_') }}_task"
+  validator: "{% if not image_processing_module.isidentifier() %}Invalid image processing module name{% endif %}"
+
+# Feature extraction task configuration
+include_feature_task:
+  when: "{{ mode == 'customize' }}"
+  help: Include an example feature extraction task?
+  type: bool
+  default: true
+
+feature_task:
+  when: "{{ mode == 'customize' and include_feature_task }}"
+  help: >
+    Name of the feature extraction task (e.g., Region Props Features). 
+    This is how the task will be listed in the Fractal web interface.
+  type: str
+  default: Region Props Features
+  validator: >-
+    {% if not (feature_task | regex_search('^[a-zA-Z][a-zA-Z0-9\_\-\ ]+$')) %}
+    feature_task must start with a letter, followed one or more letters, digits, hyphens, underscores or spaces.
+    {% endif %}
+    {% if feature_task | trim != feature_task %}
+    feature_task must not have leading or trailing spaces.
+    {% endif %}
+
+feature_module:
+  when: false
+  default: "{{ feature_task | lower | replace('-', '_') | replace(' ', '_') }}_task"
+  validator: "{% if not feature_module.isidentifier() %}Invalid feature module name{% endif %}"
 
 project_license:
   when: "{{ mode == 'customize' }}"
@@ -50,3 +140,27 @@ project_license:
     Apache-2.0: Apache-2.0
     GNU GPLv3: GPL-3.0
     none: none
+
+run_git_init:
+  help: Initialize a git repository in the generated project? (Requires `git` to be installed)
+  type: bool
+  default: true
+
+run_pixi_init_task:
+  help: >
+    Run pixi init task? (Requires `pixi` to be installed)
+    This will set up pre-commit hooks, run tests, and format the code.
+  type: bool
+  default: true
+
+_tasks:
+  - command: git init
+    when: "{{ run_git_init }}"
+  - command: git add .
+    when: "{{ run_git_init }}"
+  - command: git commit -m 'Initial commit from copier template'
+    when: "{{ run_git_init }}"
+  - command: git tag -a 0.1.0 -m 'Initial tag from copier template'
+    when: "{{ run_git_init }}"
+  - command: pixi run init-tasks
+    when: "{{ run_pixi_init_task }}"

@@ -1,0 +1,70 @@
+"""Contains the list of tasks available to fractal."""
+
+from fractal_task_tools.task_models import (
+    ParallelTask,
+)
+
+AUTHORS = "{{ author_name }}"
+
+{% if project_url == "" %}
+DOCS_LINK = None
+{% else %}
+DOCS_LINK = "{{ project_url }}"
+{% endif %}
+
+INPUT_MODELS = [
+    ("ngio", "images/_image.py", "ChannelSelectionModel"),
+    (
+        "{{ package_name }}",
+        "utils.py",
+        "MaskingConfiguration",
+    ),
+    (
+        "{{ package_name }}",
+        "utils.py",
+        "IteratorConfiguration",
+    ),
+]
+
+TASK_LIST = [
+    {% if include_segmentation_task %}
+    ParallelTask(
+        name="{{ segmentation_task }}",
+        executable="{{ segmentation_module }}.py",
+        # Modify the meta according to your task requirements
+        # If the task requires a GPU, add "needs_gpu": True
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Segmentation",
+        tags=["Instance Segmentation", "Classical segmentation"],
+        docs_info="file:docs_info/{{ segmentation_module }}.md",
+    ),
+    {% endif %}
+    {% if include_image_processing_task %}
+    ParallelTask(
+        name="{{ image_processing_task }}",
+        executable="{{ image_processing_module }}.py",
+        # Modify the meta according to your task requirements
+        # If the task requires a GPU, add "needs_gpu": True
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Image Processing",
+        tags=["Denoising", "{{ image_processing_task }}"],
+        docs_info="file:docs_info/{{ image_processing_module }}.md",
+        # Uncomment the following line to forbid re-running the task on already
+        # processed images
+        # input_types={"is_blurred": False},
+        output_types={"is_blurred": True},
+    ),
+    {% endif %}
+    {% if include_feature_task %}
+    ParallelTask(
+        name="{{ feature_task }}",
+        executable="{{ feature_module }}.py",
+        # Modify the meta according to your task requirements
+        # If the task requires a GPU, add "needs_gpu": True
+        meta={"cpus_per_task": 1, "mem": 4000},
+        category="Measurement",
+        tags=["Region Properties", "Intensity", "Morphology"],
+        docs_info="file:docs_info/{{ feature_module }}.md",
+    ),
+    {% endif %}
+]

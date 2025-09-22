@@ -1,0 +1,32 @@
+name: copy-install-test-build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  copy_install_test_build:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install copier
+        run: pipx install copier
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: python -m pip install -e .
+
+      - name: Testing if template matches the codebases
+        run: python src/build_template/main.py --check
+
+      - name: copy-install-test-build
+        run: ./tests/copier/copy-install-test-build.sh
