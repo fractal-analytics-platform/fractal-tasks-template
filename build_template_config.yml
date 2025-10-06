@@ -34,7 +34,7 @@ keyword_map:
     author_email: "task_author@example.com"
     project_name: "fractal-tasks-template"
     package_name: "fractal_tasks_template"
-    project_url: "https://github.com/fractal-analytics-platform/fractal-tasks-template"
+    project_url: "https://github.com/fractal-analytics-platform"
     project_short_description: "Collection of example tasks for the Fractal framework"
     project_license: "BSD-3-Clause"
     # Task-specific

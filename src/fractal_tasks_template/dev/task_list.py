@@ -9,7 +9,7 @@ AUTHORS = "BioVision Center Team"
 # --- #{% if project_url == "" %}
 # --- #DOCS_LINK = None
 # --- #{% else %}
-DOCS_LINK = "https://github.com/fractal-analytics-platform/fractal-tasks-template"
+DOCS_LINK = "https://github.com/fractal-analytics-platform"
 # --- #{% endif %}
 
 INPUT_MODELS = [
