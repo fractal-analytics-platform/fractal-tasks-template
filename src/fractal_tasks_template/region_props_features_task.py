@@ -4,15 +4,17 @@ import logging
 
 import numpy as np
 import pandas as pd
-from ngio import Roi, open_ome_zarr_container
-from ngio.common.transforms import ZoomTransform
+from ngio import Roi, RoiPixels, open_ome_zarr_container
 from ngio.experimental.iterators import FeatureExtractorIterator
 from ngio.tables import FeatureTable
+from ngio.transforms import ZoomTransform
 from pydantic import validate_call
 from skimage import measure
 
 
-def region_props_features_func(image: np.ndarray, label: np.ndarray, roi: Roi) -> dict:
+def region_props_features_func(
+    image: np.ndarray, label: np.ndarray, roi: Roi | RoiPixels
+) -> dict:
     """Extract region properties features from a label image within a ROI."""
     assert image.ndim in (3, 4), "Image must be 3D yxc or 4D yxzc "
     assert image.ndim == label.ndim, (
@@ -119,10 +121,10 @@ def region_props_features_task(
 
     # Since the label image might be at a different resolution than the image,
     # we need to rescale it to match the image resolution
-    label_zoom_transform = ZoomTransform.from_dimensions(
-        original_dimension=label_image.dimensions,
-        target_dimension=image.dimensions,
-        order=0,  # Nearest neighbor for labels
+    label_zoom_transform = ZoomTransform(
+        input_image=label_image,
+        target_image=image,
+        order="nearest",
     )
 
     # Create an iterator to process the image and extract features
