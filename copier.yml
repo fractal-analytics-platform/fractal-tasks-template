@@ -34,6 +34,10 @@ project_url:
   help: A URL for your project home page or documentation (optional)
   type: str
   default: ""
+  validator: >-
+    {% if project_url and not (project_url | regex_search('^(https?://|www\\.)[\\w.-]+(?:\\.[a-zA-Z]{2,})(?:/\\S*)?$')) %}
+    Must be a valid URL starting with http://, https://, or www.
+    {% endif %}
 
 project_short_description:
   help: A short description of the package

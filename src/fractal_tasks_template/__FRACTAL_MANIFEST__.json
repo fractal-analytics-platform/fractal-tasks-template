@@ -131,7 +131,7 @@
         "type": "object",
         "title": "ThresholdSegmentationTask"
       },
-      "docs_link": "project_url.uzh.ch"
+      "docs_link": "https://github.com/fractal-analytics-platform/fractal-tasks-template"
     },
     {
       "name": "Gaussian Blur",
@@ -194,7 +194,7 @@
         "type": "object",
         "title": "GaussianBlurTask"
       },
-      "docs_link": "project_url.uzh.ch"
+      "docs_link": "https://github.com/fractal-analytics-platform/fractal-tasks-template"
     },
     {
       "name": "Region Props Features",
@@ -244,7 +244,7 @@
         "type": "object",
         "title": "RegionPropsFeaturesTask"
       },
-      "docs_link": "project_url.uzh.ch"
+      "docs_link": "https://github.com/fractal-analytics-platform/fractal-tasks-template"
     }
   ],
   "has_args_schemas": true,

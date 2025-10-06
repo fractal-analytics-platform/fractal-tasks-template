@@ -26,8 +26,12 @@ authors = [
 
 # Required Python version and dependencies
 requires-python = ">=3.11,<3.14"
-dependencies = ["ngio==0.4.0a3", "scikit-image", "fractal-task-tools"]
-# addd 
+dependencies = [
+    "ngio>=0.4.1,<0.5",
+    "scikit-image",
+    "fractal-task-tools>=0.0.14",
+]
+
 # Optional dependencies (e.g. for `pip install -e ".[dev]"`, see
 # https://peps.python.org/pep-0621/#dependencies-optional-dependencies)
 [project.optional-dependencies]
