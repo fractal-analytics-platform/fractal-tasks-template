@@ -127,7 +127,7 @@ def threshold_segmentation_task(
         iterator = SegmentationIterator(
             input_image=image,
             output_label=label,
-            channel_selection=0,  # channel,
+            channel_selection=channel,
             axes_order="zyx",
         )
     else:
