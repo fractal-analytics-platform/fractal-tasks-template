@@ -34,8 +34,8 @@ _exclusion_patterns = [
 
 # Additional mappings that are not in keywords_map.yml
 _fix_mappings = {
-    "{{ '{{' }}  matrix.python-version {{ '{{' }} }}": "{{ matrix.python-version }}",
-    "{{ '{{' }}  matrix.os {{ '{{' }} }}": "{{ matrix.os }}",
+    "{{ '{{' }}  matrix.python-version {{ '{{' }}": "{{ matrix.python-version }}",
+    "{{ '{{' }}  matrix.os {{ '{{' }}": "{{ matrix.os }}",
     "": "# --- #",  # Special marker to uncomment lines
 }
 
