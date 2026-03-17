@@ -4,13 +4,14 @@ import logging
 import os
 import pathlib
 import shutil
-from typing import Optional
 
 from dask import array as da
 from ngio import open_ome_zarr_container
 from ngio.experimental.iterators import ImageProcessingIterator
 from pydantic import validate_call
 from scipy.ndimage import gaussian_filter
+
+logger = logging.getLogger("{{ image_processing_module }}")
 
 
 def compute_gaussian_blur(image: da.Array, sigma: tuple[float, ...]) -> da.Array:
@@ -25,15 +26,15 @@ def compute_gaussian_blur(image: da.Array, sigma: tuple[float, ...]) -> da.Array
     """
 
     # Apply Gaussian filter to each chunk
-    def apply_gaussian(chunk):
+    def apply_gaussian(chunk: da.Array) -> da.Array:
         return gaussian_filter(chunk, sigma=sigma)
 
     assert image.ndim in (3, 4), "Image must be 2D or 3D (+channel)"
     assert len(sigma) == image.ndim, "Sigma must match image dimensions"
-    # This will itroduce some edge artifacts at chunk boundaries
+    # This will introduce some edge artifacts at chunk boundaries
     # In a real application, consider using map_overlap to mitigate this
     # With appropriate depth based on sigma
-    blurred_image = image.map_blocks(apply_gaussian, dtype=image.dtype)
+    blurred_image = image.map_blocks(apply_gaussian, dtype=image.dtype)  # type: ignore
     return blurred_image
 
 
@@ -45,7 +46,7 @@ def {{ image_processing_module }}(
     # Input parameters
     output_image_suffix: str = "gaussian_blur",
     sigma_xy: float = 1.0,
-    sigma_z: Optional[float] = None,
+    sigma_z: float | None = None,
     overwrite: bool = True,
     overwrite_input: bool = False,
 ) -> dict | None:
@@ -56,7 +57,7 @@ def {{ image_processing_module }}(
         output_image_suffix (str): Suffix for the output image name.
         sigma_xy (float): Standard deviation for Gaussian kernel in the XY plane.
             Defaults to 1.0.
-        sigma_z (Optional[float]): Standard deviation for Gaussian kernel
+        sigma_z (float | None): Standard deviation for Gaussian kernel
             in the Z direction. If None, the smoothing will be applied only in XY.
         overwrite (bool): Whether to overwrite an existing output image.
             Defaults to True.
@@ -64,21 +65,21 @@ def {{ image_processing_module }}(
             OME-Zarr image with the Gaussian blur applied, and then overwrite
             the original image with the new one. Defaults to False.
     """
-    logging.info(f"{zarr_url=}")
+    logger.info(f"{zarr_url=}")
 
     # Open the OME-Zarr container
     ome_zarr = open_ome_zarr_container(zarr_url)
-    logging.info(f"{ome_zarr=}")
+    logger.info(f"{ome_zarr=}")
 
     zarr_path = pathlib.Path(zarr_url)
     zarr_dir, image_name = zarr_path.parent, zarr_path.stem
-    logging.info(f"Input image name: {image_name}")
+    logger.info(f"Input image name: {image_name}")
 
     output_image_suffix = (
         output_image_suffix.strip().lstrip().rstrip().replace(" ", "_")
     )
     output_image_name = f"{image_name}_{output_image_suffix}{zarr_path.suffix}"
-    logging.info(f"New image name: {output_image_name}")
+    logger.info(f"New image name: {output_image_name}")
 
     output_zarr_path = zarr_dir / output_image_name
     output_ome_zarr = ome_zarr.derive_image(
@@ -86,7 +87,7 @@ def {{ image_processing_module }}(
         name=output_image_name,
         overwrite=overwrite,
     )
-    logging.info(f"New OME-Zarr created at {output_zarr_path=}")
+    logger.info(f"New OME-Zarr created at {output_zarr_path=}")
     input_image = ome_zarr.get_image()
     output_image = output_ome_zarr.get_image()
 
@@ -99,21 +100,21 @@ def {{ image_processing_module }}(
         axes_order = "czyx"
         sigma = (0, sigma_z, sigma_xy, sigma_xy)
 
-    logging.info(f"Running Gaussian blur with sigma={sigma} on axes {axes_order}")
+    logger.info(f"Running Gaussian blur with sigma={sigma} on axes {axes_order}")
     iterator = ImageProcessingIterator(
         input_image=input_image, output_image=output_image, axes_order=axes_order
     )
 
     if sigma_z is None:
         iterator = iterator.by_yx()
-        logging.info("Iterator set to by_yx() for 2D Gaussian blur")
+        logger.info("Iterator set to by_yx() for 2D Gaussian blur")
     else:
         # Set iterator to process by ZYX volumes for 3D Gaussian blur
         # all other axes are broadcasted
         # Strict=False means that if there no z axis or z is size 1, it will still work
         # If your processing needs requires a volume, use strict=True
         iterator = iterator.by_zyx(strict=False)
-        logging.info("Iterator set to by_zyx() for 3D Gaussian blur")
+        logger.info("Iterator set to by_zyx() for 3D Gaussian blur")
 
     # If you would like to iterate over arbitrary region of interests (ROIs),
     # you can uncomment the following line and provide the ROIs
@@ -128,10 +129,10 @@ def {{ image_processing_module }}(
 
     # No need to call output_image.consolidate()
     # ImageProcessingIterator handles this
-    logging.info("Gaussian blur processing complete.")
+    logger.info("Gaussian blur processing complete.")
 
     if overwrite_input:
-        logging.info("Replace original zarr image with the newly created Zarr image")
+        logger.info("Replace original zarr image with the newly created Zarr image")
         backup_path = zarr_path.parent / f"{zarr_path.stem}_backup{zarr_path.suffix}"
         os.rename(zarr_path, backup_path)
         os.rename(output_zarr_path, zarr_path)

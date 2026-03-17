@@ -25,11 +25,11 @@ authors = [
 ]
 
 # Required Python version and dependencies
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 dependencies = [
-    "ngio>=0.4.1,<0.5",
+    "ngio>=0.5.6,<0.6.0",
     "scikit-image>=0.26.0",
-    "fractal-task-tools>=0.1.0,<0.2.0",
+    "fractal-task-tools==0.4.0a7",
 ]
 
 # Optional dependencies (e.g. for `pip install -e ".[dev]"`, see
@@ -37,8 +37,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "notebook",
-    "napari",
-    "pyqt5",
     "devtools",
     "hatch",
     "pytest",
