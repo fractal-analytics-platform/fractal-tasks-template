@@ -1,7 +1,6 @@
 """This is the Python module for my_task."""
 
 import logging
-from typing import Optional
 
 import numpy as np
 from ngio import ChannelSelectionModel, open_ome_zarr_container
@@ -12,6 +11,8 @@ from skimage.measure import label
 from skimage.morphology import ball, dilation, disk, opening, remove_small_objects
 
 from fractal_tasks_template.utils import IteratorConfiguration, MaskingConfiguration
+
+logger = logging.getLogger("threshold_segmentation_task")
 
 
 def segmentation_function(
@@ -33,7 +34,7 @@ def segmentation_function(
     binary_img = int_img >= threshold
 
     # Removing small objects
-    cleaned_img = remove_small_objects(binary_img, min_size=min_size)
+    cleaned_img = remove_small_objects(binary_img, max_size=min_size)
     # Opening to separate touching objects
     if cleaned_img.ndim == 2:
         selem = disk(1)
@@ -67,7 +68,7 @@ def load_masked_image(
     else:
         masking_label_name = masking_configuration.identifier
         masking_table_name = None
-    logging.info(f"Using masking with {masking_table_name=}, {masking_label_name=}")
+    logger.info(f"Using masking with {masking_table_name=}, {masking_label_name=}")
 
     # Base Iterator with masking
     masked_image = ome_zarr.get_masked_image(
@@ -83,39 +84,45 @@ def threshold_segmentation_task(
     zarr_url: str,
     # Segmentation parameters
     channel: ChannelSelectionModel,
-    label_name: Optional[str] = None,
+    label_name: str | None = None,
     threshold: int,
     min_size: int = 50,
     # Iteration parameters
-    iterator_configuration: Optional[IteratorConfiguration] = None,
+    iterator_configuration: IteratorConfiguration | None = None,
     overwrite: bool = True,
 ) -> None:
     """Segment an image using a simple thresholding method.
+
+    This taks demostrates how to use the SegmentationIterator and
+    MaskedSegmentationIterator to perform segmentation. We provide a separate
+    utility package with some helper functions and classes to streamline the development
+    of measurement tasks. For more infos check:
+    https://github.com/fractal-analytics-platform/fractal-tasks-utils
 
     Args:
         zarr_url (str): URL to the OME-Zarr container
         channel (ChannelSelectionModel): Select the input channel to be used for
             segmentation.
-        label_name (Optional[str]): Name of the resulting label image. If not provided,
+        label_name (str | None): Name of the resulting label image. If not provided,
             it will be set to "<channel_identifier>_thresholded".
         threshold (int): Threshold value to be applied.
         min_size (int): Minimum size of objects. Smaller objects are filtered out.
-        iterator_configuration (Optional[IteratorConfiguration]): Advanced
+        iterator_configuration (IteratorConfiguration | None): Advanced
             configuration to control masked and ROI-based iteration.
         overwrite (bool): Whether to overwrite an existing label image.
             Defaults to True.
     """
     # Use the first of input_paths
-    logging.info(f"{zarr_url=}")
+    logger.info(f"{zarr_url=}")
 
     # Open the OME-Zarr container
     ome_zarr = open_ome_zarr_container(zarr_url)
-    logging.info(f"{ome_zarr=}")
+    logger.info(f"{ome_zarr=}")
 
     if label_name is None:
         label_name = f"{channel.identifier}_thresholded"
     label = ome_zarr.derive_label(name=label_name, overwrite=overwrite)
-    logging.info(f"Output label image: {label=}")
+    logger.info(f"Output label image: {label=}")
 
     if iterator_configuration is None:
         iterator_configuration = IteratorConfiguration()
@@ -123,7 +130,7 @@ def threshold_segmentation_task(
     if iterator_configuration.masking is None:
         # Create a basic SegmentationIterator without masking
         image = ome_zarr.get_image()
-        logging.info(f"{image=}")
+        logger.info(f"{image=}")
         iterator = SegmentationIterator(
             input_image=image,
             output_label=label,
@@ -136,7 +143,7 @@ def threshold_segmentation_task(
             ome_zarr=ome_zarr,
             masking_configuration=iterator_configuration.masking,
         )
-        logging.info(f"{masked_image=}")
+        logger.info(f"{masked_image=}")
         # A masked iterator is created instead of a basic segmentation iterator
         # This will do two major things:
         # 1) It will iterate only over the regions of interest defined by the
@@ -152,7 +159,7 @@ def threshold_segmentation_task(
     # Strict=False means that if there no z axis or z is size 1, it will still work
     # If your segmentation needs requires a volume, use strict=True
     iterator = iterator.by_zyx(strict=False)
-    logging.info(f"Iterator created: {iterator=}")
+    logger.info(f"Iterator created: {iterator=}")
 
     if iterator_configuration.roi_table is not None:
         # If a ROI table is provided, we load it and use it to further restrict
@@ -160,27 +167,27 @@ def threshold_segmentation_task(
         # Be aware that this is not an alternative to masking
         # but only an additional restriction
         table = ome_zarr.get_generic_roi_table(name=iterator_configuration.roi_table)
-        logging.info(f"ROI table retrieved: {table=}")
+        logger.info(f"ROI table retrieved: {table=}")
         iterator = iterator.product(table)
-        logging.info(f"Iterator updated with ROI table: {iterator=}")
+        logger.info(f"Iterator updated with ROI table: {iterator=}")
 
     # Keep track of the maximum label to ensure unique across iterations
     max_label = 0
     #
     # Core processing loop
     #
-    logging.info("Starting processing...")
+    logger.info("Starting processing...")
     for image_data, writer in iterator.iter_as_numpy():
         label_img = segmentation_function(
             int_img=image_data, threshold=threshold, min_size=min_size
         )
         # Ensure unique labels across different chunks
         label_img = np.where(label_img == 0, 0, label_img + max_label)
-        max_label = label_img.max()
+        max_label = max(max_label, label_img.max())
         writer(label_img)
     # No need to call label.consolidate()
     # SegmentationIterator handles this
-    logging.info(f"label {label_name} successfully created at {zarr_url}")
+    logger.info(f"label {label_name} successfully created at {zarr_url}")
     return None
 
 

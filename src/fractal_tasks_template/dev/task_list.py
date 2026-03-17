@@ -12,20 +12,6 @@ AUTHORS = "BioVision Center Team"
 DOCS_LINK = "https://github.com/fractal-analytics-platform"
 # --- #{% endif %}
 
-INPUT_MODELS = [
-    ("ngio", "images/_image.py", "ChannelSelectionModel"),
-    (
-        "fractal_tasks_template",
-        "utils.py",
-        "MaskingConfiguration",
-    ),
-    (
-        "fractal_tasks_template",
-        "utils.py",
-        "IteratorConfiguration",
-    ),
-]
-
 TASK_LIST = [
     # --- #{% if include_segmentation_task %}
     ParallelTask(
