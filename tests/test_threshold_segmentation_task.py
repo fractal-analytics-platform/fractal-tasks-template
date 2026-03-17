@@ -40,7 +40,7 @@ def test_threshold_segmentation_task(tmp_path: Path, shape: tuple[int, ...], axe
     ome_zarr = create_synthetic_ome_zarr(
         store=test_data_path,
         shape=shape,
-        channel_labels=channel_labels,
+        channels_meta=channel_labels,
         overwrite=False,
         axes_names=axes,
     )
@@ -91,7 +91,7 @@ def test_threshold_segmentation_task_masked(
     ome_zarr = create_synthetic_ome_zarr(
         store=test_data_path,
         shape=shape,
-        channel_labels=channel_labels,
+        channels_meta=channel_labels,
         overwrite=False,
         axes_names=axes,
     )
