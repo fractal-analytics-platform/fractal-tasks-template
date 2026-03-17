@@ -1,11 +1,17 @@
 """Tests for valid manifest."""
 
 import json
+from pathlib import Path
 
 import requests
 from jsonschema import validate
 
-from . import MANIFEST
+import fractal_tasks_template
+
+PACKAGE_DIR = Path(fractal_tasks_template.__file__).parent
+MANIFEST_FILE = PACKAGE_DIR / "__FRACTAL_MANIFEST__.json"
+with MANIFEST_FILE.open("r") as f:
+    MANIFEST = json.load(f)
 
 
 def test_valid_manifest(tmp_path):
