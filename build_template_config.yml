@@ -11,6 +11,7 @@ to_be_included: [
     "tests",
     "pyproject.toml",
     ".gitignore",
+    ".gitattributes",
     ".pre-commit-config.yaml",
     ".github",
 ]
