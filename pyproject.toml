@@ -45,9 +45,7 @@ authors = [
 # Required Python version and dependencies
 requires-python = ">=3.11,<3.15"
 dependencies = [
-    # TODO: temporary exact pin for ngio 1.1 pre-release validation
-    # relax to "ngio>=1.1.0" once ngio 1.1.0 final is on PyPI
-    "ngio==1.1.0b5",
+    "ngio>=1.1.0,<1.2",
     "scikit-image>=0.26.0",
     "fractal-task-tools>=0.4.0,<0.5.0",
 ]
