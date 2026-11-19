@@ -5,37 +5,30 @@ import os
 import pathlib
 import shutil
 
-from dask import array as da
+import numpy as np
 from ngio import open_ome_zarr_container
-from ngio.experimental.iterators import ImageProcessingIterator
+from ngio.iterators import ImageProcessingIterator
 from pydantic import validate_call
 from scipy.ndimage import gaussian_filter
 
 logger = logging.getLogger("gaussian_blur_task")
 
 
-def compute_gaussian_blur(image: da.Array, sigma: tuple[float, ...]) -> da.Array:
-    """Apply Gaussian blur to a Dask array image.
+def compute_gaussian_blur(image: np.ndarray, sigma: tuple[float, ...]) -> np.ndarray:
+    """Apply Gaussian blur to an image region.
 
     Args:
-        image (da.Array): Input image as a Dask array.
+        image (np.ndarray): Input image region.
         sigma (tuple[float, ...]): Standard deviation for Gaussian kernel.
 
     Returns:
-        da.Array: Blurred image as a Dask array.
+        np.ndarray: Blurred image region.
     """
-
-    # Apply Gaussian filter to each chunk
-    def apply_gaussian(chunk: da.Array) -> da.Array:
-        return gaussian_filter(chunk, sigma=sigma)
-
     assert image.ndim in (3, 4), "Image must be 2D or 3D (+channel)"
     assert len(sigma) == image.ndim, "Sigma must match image dimensions"
-    # This will introduce some edge artifacts at chunk boundaries
-    # In a real application, consider using map_overlap to mitigate this
-    # With appropriate depth based on sigma
-    blurred_image = image.map_blocks(apply_gaussian, dtype=image.dtype)  # type: ignore
-    return blurred_image
+    # The iterator hands us one whole region at a time, so the filter is applied
+    # in one pass -- no chunk-boundary artifacts to work around.
+    return gaussian_filter(image, sigma=sigma)
 
 
 @validate_call
@@ -102,7 +95,12 @@ def gaussian_blur_task(
 
     logger.info(f"Running Gaussian blur with sigma={sigma} on axes {axes_order}")
     iterator = ImageProcessingIterator(
-        input_image=input_image, output_image=output_image, axes_order=axes_order
+        input_image=input_image,
+        output_image=output_image,
+        axes_order=axes_order,
+        # In ngio=1.2 "auto" becomes the default: it builds the pyramid in
+        # memory wherever that is provably identical to the chunked path.
+        consolidation_mode="auto",
     )
 
     if sigma_z is None:
@@ -123,7 +121,7 @@ def gaussian_blur_task(
     #
     # Core processing loop
     #
-    for input_data, writer in iterator.iter_as_dask():
+    for input_data, writer in iterator.iter_as_numpy():
         blurred_data = compute_gaussian_blur(input_data, sigma=sigma)
         writer(blurred_data)
 

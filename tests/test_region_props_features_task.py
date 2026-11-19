@@ -76,7 +76,7 @@ def test_region_props_features_task_rescaling(tmp_path: Path):
     label.set_array(
         patch=ome_zarr.get_label(name="nuclei", path="1").get_as_numpy(),
     )
-    label.consolidate()
+    label.consolidate(mode="auto")
 
     region_props_features_task(
         zarr_url=str(test_data_path),

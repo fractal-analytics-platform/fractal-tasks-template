@@ -3,9 +3,8 @@
 import logging
 
 import numpy as np
-from ngio import ChannelSelectionModel, open_ome_zarr_container
-from ngio.experimental.iterators import MaskedSegmentationIterator, SegmentationIterator
-from ngio.images._masked_image import MaskedImage
+from ngio import ChannelSelectionModel, MaskedImage, open_ome_zarr_container
+from ngio.iterators import MaskedSegmentationIterator, SegmentationIterator
 from pydantic import validate_call
 from skimage.measure import label
 from skimage.morphology import ball, dilation, disk, opening, remove_small_objects
@@ -136,6 +135,7 @@ def threshold_segmentation_task(
             output_label=label,
             channel_selection=channel,
             axes_order="zyx",
+            consolidation_mode="auto",
         )
     else:
         # Since masking is requested, we need to determine load a masking image
@@ -154,6 +154,7 @@ def threshold_segmentation_task(
             output_label=label,
             channel_selection=channel,
             axes_order="zyx",
+            consolidation_mode="auto",
         )
     # Make sure that if we have a time axis, we iterate over it
     # Strict=False means that if there no z axis or z is size 1, it will still work

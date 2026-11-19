@@ -5,7 +5,7 @@ import logging
 import numpy as np
 import pandas as pd
 from ngio import Roi, open_ome_zarr_container
-from ngio.experimental.iterators import FeatureExtractorIterator
+from ngio.iterators import FeatureExtractorIterator
 from ngio.tables import FeatureTable
 from ngio.transforms import ZoomTransform
 from pydantic import validate_call
